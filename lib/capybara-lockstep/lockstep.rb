@@ -2,40 +2,36 @@ module Capybara
   module Lockstep
     class << self
       include Patiently
-
-      def await_timeout
-        @await_timeout || 10
-      end
-
-      def await_timeout=(seconds)
-        @await_timeout = seconds
-      end
+      include Configuration
 
       def await_idle
-        return unless javascript_driver?
+        return unless enabled?
 
         ignoring_alerts do
           # evaluate_async_script also times out after Capybara.default_max_wait_time
           with_max_wait_time(await_timeout) do
-            evaluate_async_script(<<~JS)
+            message_from_js = evaluate_async_script(<<~JS)
               let done = arguments[0]
               if (window.CapybaraLockstep) {
                 CapybaraLockstep.awaitIdle(done)
               } else {
-                done()
+                done('Cannot synchronize: Capybara::Lockstep was not included in page')
               }
             JS
+            log(message_from_js)
           end
         end
       end
 
       def await_initialized
-        return unless javascript_driver?
+        return unless enabled?
 
         patiently(await_timeout) do
           if (reason = initialize_reason)
+            log(reason)
+
             # Raise an exception that will be retried by `patiently`
-            raise Capybara::ExpectationNotMet, reason
+            raise Busy, reason
           end
         end
       end
@@ -46,7 +42,7 @@ module Capybara
         ignoring_alerts do
           execute_script(<<~JS)
             if (location.href.indexOf('data:') == 0) {
-              return 'Waiting for initial page load'
+              return 'Requesting initial page'
             }
 
             if (document.readyState !== "complete") {
@@ -57,11 +53,11 @@ module Capybara
             // The "initializing" class is removed by an Angular directive (backend)
             // or Unpoly compiler (frontend).
             if (document.querySelector('body.initializing')) {
-              return 'Application code is initializing'
+              return 'Application JavaScript is initializing'
             }
 
             if (window.CapybaraLockstep && CapybaraLockstep.isBusy()) {
-              return 'AJAX or event handlers are running'
+              return 'JavaScript or AJAX requests are running'
             }
 
             return false
@@ -74,10 +70,6 @@ module Capybara
       end
 
       delegate :evaluate_script, :evaluate_async_script, :execute_script, :driver, to: :page
-
-      def javascript_driver?
-        driver.is_a?(Capybara::Selenium::Driver)
-      end
 
       def ignoring_alerts(&block)
         block.call
@@ -92,6 +84,19 @@ module Capybara
           block.call
         ensure
           Capybara.default_max_wait_time = old_max_wait_time
+        end
+      end
+
+      def log(message)
+        if debug? && message.present?
+          message = "[Capybara::Lockstep] #{message}"
+          if @debug.respond_to?(:debug)
+            # If someone set Capybara::Lockstep to a logger, use that
+            @debug.debug(message)
+          else
+            # Otherwise print to STDOUT
+            puts message
+          end
         end
       end
 

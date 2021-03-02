@@ -4,6 +4,7 @@ module Capybara
     module Patiently
 
       RETRY_ERRORS = %w[
+        Capybara::Lockstep::Busy
         Capybara::ElementNotFound
         Spec::Expectations::ExpectationNotMetError
         RSpec::Expectations::ExpectationNotMetError
