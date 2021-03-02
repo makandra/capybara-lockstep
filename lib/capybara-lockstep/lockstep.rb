@@ -56,11 +56,11 @@ module Capybara
               return 'Document is loading'
             }
 
-            // The application layouts render a <body class="initializing">.
-            // The "initializing" class is removed by an Angular directive (backend)
-            // or Unpoly compiler (frontend).
-            if (document.querySelector('body.initializing')) {
-              return 'Application JavaScript is initializing'
+            // The application layouts render a <body data-hydrating>.
+            // The [data-hydrating] attribute is removed by an Angular directive or Unpoly compiler (frontend).
+            // to signal that all elements have been activated.
+            if (document.querySelector('body[data-hydrating]')) {
+              return 'JavaScript is hydrating the DOM'
             }
 
             if (window.CapybaraLockstep && CapybaraLockstep.isBusy()) {
