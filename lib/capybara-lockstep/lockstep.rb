@@ -26,9 +26,16 @@ module Capybara
       def await_initialized
         return unless enabled?
 
+        # We're retrying the initialize check every few ms.
+        # Don't clutter the log with dozens of identical messages.
+        last_logged_reason = nil
+
         patiently(await_timeout) do
           if (reason = initialize_reason)
-            log(reason)
+            if reason != last_logged_reason
+              log(reason)
+              last_logged_reason = reason
+            end
 
             # Raise an exception that will be retried by `patiently`
             raise Busy, reason
