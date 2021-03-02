@@ -12,6 +12,8 @@ module Capybara
       end
 
       def await_idle
+        return unless javascript_driver?
+
         ignoring_alerts do
           # evaluate_async_script also times out after Capybara.default_max_wait_time
           with_max_wait_time(await_timeout) do
@@ -28,17 +30,19 @@ module Capybara
       end
 
       def await_initialized
+        return unless javascript_driver?
+
         patiently(await_timeout) do
-          if (reason = initializing?)
+          if (reason = initialize_reason)
             # Raise an exception that will be retried by `patiently`
             raise Capybara::ExpectationNotMet, reason
           end
         end
       end
 
-      def initializing?
-        return unless javascript_driver?
+      private
 
+      def initialize_reason
         ignoring_alerts do
           execute_script(<<~JS)
             if (location.href.indexOf('data:') == 0) {
@@ -65,8 +69,6 @@ module Capybara
         end
       end
 
-      private
-
       def page
         Capybara.current_session
       end
@@ -79,7 +81,7 @@ module Capybara
 
       def ignoring_alerts(&block)
         block.call
-      rescue Selenium::WebDriver::Error::UnexpectedAlertOpenError
+      rescue ::Selenium::WebDriver::Error::UnexpectedAlertOpenError
         # noop
       end
 

@@ -1,4 +1,5 @@
 require 'capybara'
+require 'selenium-webdriver'
 require 'active_support/core_ext/module/delegation'
 
 module Capybara
