@@ -60,7 +60,7 @@ module Capybara
             // The [data-hydrating] attribute is removed by an Angular directive or Unpoly compiler (frontend).
             // to signal that all elements have been activated.
             if (document.querySelector('body[data-hydrating]')) {
-              return 'JavaScript is hydrating the DOM'
+              return 'DOM is being hydrated'
             }
 
             if (window.CapybaraLockstep && CapybaraLockstep.isBusy()) {
