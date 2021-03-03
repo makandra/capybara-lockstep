@@ -83,10 +83,10 @@ module Capybara
               return 'Document is loading'
             }
 
-            // The application layouts render a <body data-hydrating>.
-            // The [data-hydrating] attribute is removed by an Angular directive or Unpoly compiler (frontend).
+            // The application layouts render a <body data-initializing>.
+            // The [data-initializing] attribute is removed by an Angular directive or Unpoly compiler (frontend).
             // to signal that all elements have been activated.
-            if (document.querySelector('body[data-hydrating]')) {
+            if (document.querySelector('body[data-initializing]')) {
               return 'DOM is being hydrated'
             }
 
