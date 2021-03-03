@@ -6,7 +6,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Henning Koch"]
   spec.email         = ["henning.koch@makandra.de"]
 
-  spec.summary       = "Synchronize Capybara commands with application JavaScript and AJAX requests"
+  spec.summary       = "Synchronize Capybara commands with client-side JavaScript and AJAX requests"
   spec.homepage      = "https://rubygems.org/gems/capybara-lockstep"
   spec.license       = "MIT"
   spec.required_ruby_version = Gem::Requirement.new(">= 2.4.0")
