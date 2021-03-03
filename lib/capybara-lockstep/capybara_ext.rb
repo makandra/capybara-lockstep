@@ -34,28 +34,38 @@ Capybara::Session.class_eval do
   prepend Capybara::Lockstep::VisitWithWaiting
 end
 
-if defined?(Capybara::Selenium::ChromeNode)
-  # Capybara 3
-  node_class = Capybara::Selenium::ChromeNode
-else
-  # Capybara 2
-  node_class = Capybara::Selenium::Node
+# Capybara 3 has driver-specific Node classes which sometimes
+# super to Capybara::Selenium::Node, but not always.
+node_classes = [
+  (Capybara::Selenium::ChromeNode  if defined?(Capybara::Selenium::ChromeNode)),
+  (Capybara::Selenium::FirefoxNode if defined?(Capybara::Selenium::FirefoxNode)),
+  (Capybara::Selenium::SafariNode  if defined?(Capybara::Selenium::SafariNode)),
+  (Capybara::Selenium::EdgeNode    if defined?(Capybara::Selenium::EdgeNode)),
+  (Capybara::Selenium::IENode      if defined?(Capybara::Selenium::IENode)),
+].compact
+
+if node_classes.empty?
+  # Capybara 2 has no driver-specific Node implementations,
+  # so we patch the shared base class.
+  node_classes = [Capybara::Selenium::Node]
 end
 
-node_class.class_eval do
-  extend Capybara::Lockstep::AwaitIdle
+node_classes.each do |node_class|
+  node_class.class_eval do
+    extend Capybara::Lockstep::AwaitIdle
 
-  await_idle :set
-  await_idle :select_option
-  await_idle :unselect_option
-  await_idle :click
-  await_idle :right_click
-  await_idle :double_click
-  await_idle :send_keys
-  await_idle :hover
-  await_idle :drag_to
-  await_idle :drop
-  await_idle :scroll_by
-  await_idle :scroll_to
-  await_idle :trigger
+    await_idle :set
+    await_idle :select_option
+    await_idle :unselect_option
+    await_idle :click
+    await_idle :right_click
+    await_idle :double_click
+    await_idle :send_keys
+    await_idle :hover
+    await_idle :drag_to
+    await_idle :drop
+    await_idle :scroll_by
+    await_idle :scroll_to
+    await_idle :trigger
+  end
 end
