@@ -18,8 +18,8 @@ module Capybara
     module AwaitIdle
       def await_idle(meth)
         mod = Module.new do
-          define_method meth do |*args, **kwargs, &block|
-            super(*args, **kwargs, &block).tap do
+          define_method meth do |*args, &block|
+            super(*args, &block).tap do
               Capybara::Lockstep.await_idle
             end
           end
