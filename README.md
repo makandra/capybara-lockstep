@@ -313,7 +313,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Pull requests are welcome on GitHub at <https://github.com/makandra/capistrano-lockstep>.
+Pull requests are welcome on GitHub at <https://github.com/makandra/capybara-lockstep>.
 
 ## License
 
