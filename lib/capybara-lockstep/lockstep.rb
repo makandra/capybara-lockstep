@@ -43,6 +43,33 @@ module Capybara
         end
       end
 
+      def idle?
+        unless enabled?
+          return true
+        end
+
+        result = execute_script(<<~JS)
+          if (window.CapybaraLockstep) {
+            return CapybaraLockstep.isIdle()
+          } else {
+            return 'Cannot check busy state: Capybara::Lockstep was not included in page'
+          }
+        JS
+
+        if result.is_a?(String)
+          log(result)
+          # When the snippet is missing we assume that the browser is idle.
+          # Otherwise we would wait forever.
+          true
+        else
+          result
+        end
+      end
+
+      def busy?
+        !idle?
+      end
+
       private
 
       def initialize_reason
