@@ -1,24 +1,38 @@
 module Capybara
   module Lockstep
     module VisitWithWaiting
-      def visit(*args, **kwargs, &block)
-        super(*args, **kwargs, &block).tap do
+      def visit(*args, &block)
+        visiting_remote_url = !args[0].start_with?('data:')
+
+        Capybara::Lockstep.catch_up
+
+        super(*args, &block).tap do
           # There is a step that changes drivers mid-scenario.
           # It works by creating a new Capybara session and re-visits the
           # URL from the previous session. If this happens before a URL is ever
           # loaded, it re-visits the URL "data:", which will never "finish"
           # initializing.
-          unless args[0].start_with?('data:')
+          if visiting_remote_url
             Capybara::Lockstep.await_initialized
           end
         end
       end
     end
+  end
+end
 
+
+Capybara::Session.class_eval do
+  prepend Capybara::Lockstep::VisitWithWaiting
+end
+
+module Capybara
+  module Lockstep
     module AwaitIdle
       def await_idle(meth)
         mod = Module.new do
           define_method meth do |*args, &block|
+            Capybara::Lockstep.catch_up
             super(*args, &block).tap do
               Capybara::Lockstep.await_idle
             end
@@ -28,10 +42,6 @@ module Capybara
       end
     end
   end
-end
-
-Capybara::Session.class_eval do
-  prepend Capybara::Lockstep::VisitWithWaiting
 end
 
 # Capybara 3 has driver-specific Node classes which sometimes
@@ -68,4 +78,20 @@ node_classes.each do |node_class|
     await_idle :scroll_to
     await_idle :trigger
   end
+end
+
+module Capybara
+  module Lockstep
+    module SynchronizeWithCatchUp
+      def synchronize(*args, &block)
+        Capybara::Lockstep.catch_up
+
+        super(*args, &block)
+      end
+    end
+  end
+end
+
+Capybara::Node::Base.class_eval do
+  prepend Capybara::Lockstep::SynchronizeWithCatchUp
 end
