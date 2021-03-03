@@ -2,12 +2,12 @@ module Capybara
   module Lockstep
     module Configuration
 
-      def await_timeout
-        @await_timeout || 10
+      def timeout
+        @timeout || 10
       end
 
-      def await_timeout=(seconds)
-        @await_timeout = seconds
+      def timeout=(seconds)
+        @timeout = seconds
       end
 
       def debug?

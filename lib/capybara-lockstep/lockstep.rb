@@ -9,7 +9,7 @@ module Capybara
 
         ignoring_alerts do
           # evaluate_async_script also times out after Capybara.default_max_wait_time
-          with_max_wait_time(await_timeout) do
+          with_max_wait_time(timeout) do
             message_from_js = evaluate_async_script(<<~JS)
               let done = arguments[0]
               if (window.CapybaraLockstep) {
@@ -30,7 +30,7 @@ module Capybara
         # Don't clutter the log with dozens of identical messages.
         last_logged_reason = nil
 
-        patiently(await_timeout) do
+        patiently(timeout) do
           if (reason = initialize_reason)
             if reason != last_logged_reason
               log(reason)
