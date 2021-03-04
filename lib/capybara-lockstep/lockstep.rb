@@ -19,6 +19,7 @@ module Capybara
 
       ERROR_SNIPPET_MISSING = 'Cannot synchronize: Capybara::Lockstep JavaScript snippet is missing on page'
       ERROR_PAGE_MISSING = 'Cannot synchronize before initial Capybara visit'
+      ERROR_ALERT_OPEN = 'Cannot synchronize while an alert is open'
 
       def synchronize(lazy: false)
         if (lazy && synchronized?) || @synchronizing || disabled?
@@ -63,6 +64,11 @@ module Capybara
               self.synchronized = true
             end
           end
+        rescue ::Selenium::WebDriver::Error::UnexpectedAlertOpenError
+          log ERROR_ALERT_OPEN
+          @synchronized = false
+          # Don't raise an error, this will happen in an innocent test.
+          # We will retry on the next Capybara synchronize call.
         rescue StandardError => e
           log "#{e.class.name} while synchronizing: #{e.message}"
           @synchronized = false
