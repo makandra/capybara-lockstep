@@ -220,7 +220,6 @@ ensure
 end
 ```
 
-
 ## Timeout
 
 By default capybara-lockstep will wait up to 10 seconds for the page initialize and for JavaScript and AJAX request to finish.
@@ -231,8 +230,28 @@ You can configure a different timeout:
 Capybara::Lockstep.timeout = 5 # seconds
 ```
 
+## Ruby API
+
+capybara-lockstep will automatically patch Capybara to wait for the browser after every command. **This should be enough for most test suites**.
+
+For additional edge cases you may interact with capybara-lockstep from your Ruby code.
 
 
+### Waiting until the browser is idle
+
+This will block until the document was loaded, the DOM has been hydrated and all AJAX requests have concluded:
+
+```ruby
+Capybara::Lockstep.synchronize
+```
+
+An example use case is a Cucumber step that explicitely waits for JavaScript to finish, in the rare occasion where capybara-lockstep hasn't picked up an event or request:
+
+```gherkin
+When 'I wait for the page to load' do
+  Capybara::Lockstep.synchronize
+end
+```
 
 ## JavaScript API
 
@@ -270,40 +289,11 @@ CapybaraLockstep.isIdle() // => true
 
 ### Waiting until the browser is idle
 
+This will run the given callback once the browser is considered to be idle:
+
 ```js
-CapybaraLockstep.awaitIdle(callback)
+CapybaraLockstep.synchronize(callback)
 ```
-
-## Ruby API
-
-capybara-lockstep will automatically patch Capybara to wait for the browser after every command. **This should be enough for most test suites**.
-
-For additional edge cases you may interact with capybara-lockstep from your Ruby code.
-
-
-### Waiting until the browser is idle
-
-This will block until the document was loaded and the DOM has been hydrated:
-
-```ruby
-Capybara::Lockstep.await_initialized
-```
-
-This will block while the browser is busy with JavaScript and AJAX requests:
-
-```ruby
-Capybara::Lockstep.await_idle
-```
-
-### Checking if the browser is busy
-
-You can query capybara-lockstep whether it considers the browser to be busy or idle:
-
-```ruby
-Capybara::Lockstep.idle? # => true
-Capybara::Lockstep.busy? # => false
-```
-
 
 ## Development
 
@@ -311,13 +301,16 @@ After checking out the repo, run `bin/setup` to install dependencies. Then, run 
 
 To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
+
 ## Contributing
 
 Pull requests are welcome on GitHub at <https://github.com/makandra/capybara-lockstep>.
 
+
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+
 
 ## Credits
 

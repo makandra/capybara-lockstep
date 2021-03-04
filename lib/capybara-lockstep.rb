@@ -10,8 +10,8 @@ end
 
 require_relative 'capybara-lockstep/version'
 require_relative 'capybara-lockstep/errors'
-require_relative 'capybara-lockstep/patiently'
 require_relative 'capybara-lockstep/configuration'
+require_relative 'capybara-lockstep/logging'
 require_relative 'capybara-lockstep/lockstep'
 require_relative 'capybara-lockstep/capybara_ext'
 require_relative 'capybara-lockstep/helper'

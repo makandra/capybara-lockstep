@@ -2,18 +2,23 @@ module Capybara
   module Lockstep
     module VisitWithWaiting
       def visit(*args, &block)
-        visiting_remote_url = !args[0].start_with?('data:')
+        url = args[0]
+        # Some of our apps have a Cucumber step that changes drivers mid-scenario.
+        # It works by creating a new Capybara session and re-visits the URL from the
+        # previous session. If this happens before a URL is ever loaded,
+        # it re-visits the URL "data:", which will never "finish" initializing.
+        # Also when opening a new tab via Capybara, the initial URL is about:blank.
+        visiting_remote_url = !(url.start_with?('data:') || url.start_with?('about:'))
 
-        Capybara::Lockstep.catch_up
+        if visiting_remote_url
+          # We're about to leave this screen, killing all in-flight requests.
+          Capybara::Lockstep.synchronize
+        end
 
         super(*args, &block).tap do
-          # There is a step that changes drivers mid-scenario.
-          # It works by creating a new Capybara session and re-visits the
-          # URL from the previous session. If this happens before a URL is ever
-          # loaded, it re-visits the URL "data:", which will never "finish"
-          # initializing.
           if visiting_remote_url
-            Capybara::Lockstep.await_initialized
+            # puts "After visit: unsynchronizing"
+            Capybara::Lockstep.synchronized = false
           end
         end
       end
@@ -28,13 +33,12 @@ end
 
 module Capybara
   module Lockstep
-    module AwaitIdle
-      def await_idle(meth)
+    module UnsychronizeAfter
+      def unsychronize_after(meth)
         mod = Module.new do
           define_method meth do |*args, &block|
-            Capybara::Lockstep.catch_up
             super(*args, &block).tap do
-              Capybara::Lockstep.await_idle
+              Capybara::Lockstep.synchronized = false
             end
           end
         end
@@ -62,21 +66,21 @@ end
 
 node_classes.each do |node_class|
   node_class.class_eval do
-    extend Capybara::Lockstep::AwaitIdle
+    extend Capybara::Lockstep::UnsychronizeAfter
 
-    await_idle :set
-    await_idle :select_option
-    await_idle :unselect_option
-    await_idle :click
-    await_idle :right_click
-    await_idle :double_click
-    await_idle :send_keys
-    await_idle :hover
-    await_idle :drag_to
-    await_idle :drop
-    await_idle :scroll_by
-    await_idle :scroll_to
-    await_idle :trigger
+    unsychronize_after :set
+    unsychronize_after :select_option
+    unsychronize_after :unselect_option
+    unsychronize_after :click
+    unsychronize_after :right_click
+    unsychronize_after :double_click
+    unsychronize_after :send_keys
+    unsychronize_after :hover
+    unsychronize_after :drag_to
+    unsychronize_after :drop
+    unsychronize_after :scroll_by
+    unsychronize_after :scroll_to
+    unsychronize_after :trigger
   end
 end
 
@@ -84,7 +88,9 @@ module Capybara
   module Lockstep
     module SynchronizeWithCatchUp
       def synchronize(*args, &block)
-        Capybara::Lockstep.catch_up
+        # This method is called very frequently by capybara.
+        # We use the { lazy } option to only synchronize when we're out of sync.
+        Capybara::Lockstep.synchronize(lazy: true)
 
         super(*args, &block)
       end

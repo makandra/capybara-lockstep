@@ -30,6 +30,10 @@ module Capybara
         @enabled = enabled
       end
 
+      def disabled?
+        !enabled?
+      end
+
       private
 
       def javascript_driver?
