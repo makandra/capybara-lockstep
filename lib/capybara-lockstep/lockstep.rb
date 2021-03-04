@@ -59,7 +59,7 @@ module Capybara
               self.synchronized = false
             else
               log message_from_js
-              log "Synchronized sucessfully"
+              log "Synchronized successfully"
               self.synchronized = true
             end
           end
