@@ -187,7 +187,7 @@ capybara-lockstep may or may not impact the runtime of your test suite. It depen
 
 While waiting for the browser to be idle does take a few milliseconds, Capybara no longer needs to retry failed commands. You will also save time from not needing to re-run failed tests.
 
-In casual testing I experienced a negative performance impact between 0% and 10%.
+In casual testing I experienced a performance impact between +/- 10%.
 
 
 ## Debugging log
