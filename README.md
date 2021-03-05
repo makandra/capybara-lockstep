@@ -173,9 +173,9 @@ capybara-lockstep will automatically patch Capybara to wait for the browser afte
 Run your test suite to see if integration was successful and whether stability improves. During validation we recommend to activate `Capybara::Lockstep.debug = true` in your `spec_helper.rb` (RSpec) or `env.rb` (Cucumber). You should see messages like this in your console:
 
 ```text
-[Capybara::Lockstep] Synchronizing
-[Capybara::Lockstep] Finished waiting for JavaScript
-[Capybara::Lockstep] Synchronized successfully
+[capybara-lockstep] Synchronizing
+[capybara-lockstep] Finished waiting for JavaScript
+[capybara-lockstep] Synchronized successfully
 ```
 
 Note that you may see some failures from tests with wrong assertions, which sometimes passed due to lucky timing.
@@ -201,9 +201,9 @@ Capybara::Lockstep.debug = true
 You should now see messages like this during your test runs:
 
 ```
-[Capybara::Lockstep] Synchronizing
-[Capybara::Lockstep] Finished waiting for JavaScript
-[Capybara::Lockstep] Synchronized successfully
+[capybara-lockstep] Synchronizing
+[capybara-lockstep] Finished waiting for JavaScript
+[capybara-lockstep] Synchronized successfully
 ```
 
 You may also configure logging to an existing logger object:

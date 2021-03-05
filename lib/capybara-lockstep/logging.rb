@@ -3,7 +3,7 @@ module Capybara
     module Logging
       def log(message)
         if debug? && message.present?
-          message = "[Capybara::Lockstep] #{message}"
+          message = "[capybara-lockstep] #{message}"
           if @debug.respond_to?(:debug)
             # If someone set Capybara::Lockstep to a logger, use that
             @debug.debug(message)
