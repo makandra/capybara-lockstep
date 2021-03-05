@@ -41,7 +41,7 @@ describe Capybara::Lockstep do
       stub_page
       error = Selenium::WebDriver::Error::UnexpectedAlertOpenError.new
       expect(@page).to receive(:evaluate_async_script).and_raise(error)
-      expect(subject).to receive(:log).with(match /alert/)
+      expect(subject).to receive(:log).with(match /alert/i)
       expect { subject.synchronize }.to_not raise_error
       expect(subject).not_to be_synchronized
     end
@@ -50,7 +50,16 @@ describe Capybara::Lockstep do
       stub_page
       error = Selenium::WebDriver::Error::JavascriptError.new('javascript error: document unloaded while waiting for result')
       expect(@page).to receive(:evaluate_async_script).and_raise(error)
-      expect(subject).to receive(:log).with(match /navigated away/)
+      expect(subject).to receive(:log).with(match /navigated away/i)
+      expect { subject.synchronize }.to_not raise_error
+      expect(subject).not_to be_synchronized
+    end
+
+    it 'logs but does not fail when synchronization times out (we will retry on the next Capybara synchronize)' do
+      stub_page
+      error = Selenium::WebDriver::Error::ScriptTimeoutError.new
+      expect(@page).to receive(:evaluate_async_script).and_raise(error)
+      expect(subject).to receive(:log).with(match /could not synchronize within/i)
       expect { subject.synchronize }.to_not raise_error
       expect(subject).not_to be_synchronized
     end

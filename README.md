@@ -240,9 +240,11 @@ ensure
 end
 ```
 
-## Timeout
+## Synchronization timeout
 
 By default capybara-lockstep will wait `Capybara.default_max_wait_time` seconds for the page initialize and for JavaScript and AJAX request to finish.
+
+When synchronization times out, capybara-lockstep will log but not raise an error.
 
 You can configure a different timeout:
 
@@ -250,70 +252,49 @@ You can configure a different timeout:
 Capybara::Lockstep.timeout = 5 # seconds
 ```
 
+To revert to defaulting to `Capybara.default_max_wait_time`, set the timeout to `nil`:
 
-## Ruby API
+```ruby
+Capybara::Lockstep.timeout = nil
+```
+
+
+## Manual synchronization
 
 capybara-lockstep will automatically patch Capybara to wait for the browser after every command. **This should be enough for most test suites**.
 
-For additional edge cases you may interact with capybara-lockstep from your Ruby code.
-
-
-### Waiting until the browser is idle
-
-This will block until the document was loaded, the DOM has been hydrated and all AJAX requests have concluded:
+For additional edge cases you may manually tell capybara-lockstep to wait. The following Ruby method will block until the browser is idle:
 
 ```ruby
 Capybara::Lockstep.synchronize
 ```
 
-An example use case is a Cucumber step that explicitely waits for JavaScript to finish, in the rare occasion where capybara-lockstep hasn't picked up an event or request:
-
-```gherkin
-When 'I wait for the page to load' do
-  Capybara::Lockstep.synchronize
-end
-```
-
-## JavaScript API
-
-capybara-lockstep already hooks into [many JavaScript APIs](#how-capybara-lockstep-helps) like `XMLHttpRequest` or `fetch()` to mark the browser as "busy" until their work finishes. **This should be enough for most test suites**.
-
-For additional edge cases you may interact with capybara-lockstep from your own JavaScripts.
-
-Note that when you only load the JavaScript snippet in tests you need check before calling any API functions:
+You may also synchronize from your client-side JavaScript. The following will run the given callback once the browser is idle:
 
 ```js
-if (window.CapybaraLockstep) {
-  CapybaraLockstep.startWork()
-}
+CapybaraLockstep.synchronize(callback)
 ```
 
-### Signaling asynchronous work
+## Signaling asynchronous work
 
 If for some reason you want capybara-lockstep to consider additional asynchronous work as "busy", you can do so:
 
 ```js
-CapybaraLockstep.startWork()
+CapybaraLockstep.startWork('Eject warp core')
 doAsynchronousWork().then(function() {
-  CapybaraLockstep.stopWork()
+  CapybaraLockstep.stopWork('Eject warp core')
 })
 ```
 
-### Checking if the browser is busy
+The string argument is used for logging (when logging is enabled). You can omit the string argument, in which case nothing will be logged.
 
-You can query capybara-lockstep whether it considers the browser to be busy or idle:
 
-```js
-CapybaraLockstep.isBusy() // => false
-CapybaraLockstep.isIdle() // => true
+Note that if you only load capybara-lockstep in tests you should check to the `CapybaraLockstep` global to be defined:
+
 ```
-
-### Waiting until the browser is idle
-
-This will run the given callback once the browser is considered to be idle:
-
-```js
-CapybaraLockstep.synchronize(callback)
+if (window.CapybaraLockstep) {
+  // interact with CapybaraLockstep
+}
 ```
 
 ## Development
