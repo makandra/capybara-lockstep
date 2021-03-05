@@ -242,15 +242,13 @@ end
 
 ## Timeout
 
-By default capybara-lockstep will wait up to 10 seconds for the page initialize and for JavaScript and AJAX request to finish.
+By default capybara-lockstep will wait `Capybara.default_max_wait_time` seconds for the page initialize and for JavaScript and AJAX request to finish.
 
 You can configure a different timeout:
 
 ```ruby
 Capybara::Lockstep.timeout = 5 # seconds
 ```
-
-Regardless of the configured value capybara-lockstep will always wait *at least* for `Capybara.default_max_wait_time` seconds.
 
 
 ## Ruby API
