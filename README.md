@@ -286,10 +286,19 @@ doAsynchronousWork().then(function() {
 })
 ```
 
-The string argument is used for logging (when logging is enabled). You can omit the string argument, in which case nothing will be logged.
+The string argument is used for logging (when logging is enabled). In this case you should see messages like this in your browser's JavaScript console:
+
+```text
+[capybara-lockstep] Started work: Eject warp core [1 jobs]
+[capybara-lockstep] Finished work: Eject warp core [0 jobs]
+```
+
+You may omit the string argument, in which case nothing will be logged, but the work will still be tracked.
 
 
-Note that if you only load capybara-lockstep in tests you should check to the `CapybaraLockstep` global to be defined:
+## Note on interacting with the JavaScript API
+
+If you only load capybara-lockstep in tests you, should check for the `CapybaraLockstep` global to be defined before you interact with the JavaScript API.
 
 ```
 if (window.CapybaraLockstep) {
