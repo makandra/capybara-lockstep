@@ -1,10 +1,16 @@
 module Capybara
   module Lockstep
+    ERROR_SNIPPET_MISSING = 'Cannot synchronize: capybara-lockstep JavaScript snippet is missing'
+    ERROR_PAGE_MISSING = 'Cannot synchronize before initial Capybara visit'
+    ERROR_ALERT_OPEN = 'Cannot synchronize while an alert is open'
+    ERROR_NAVIGATED_AWAY = "Browser navigated away while synchronizing"
+
     class << self
       include Configuration
       include Logging
 
-      attr_accessor :synchronized
+      attr_accessor :synchronizing
+      alias synchronizing? synchronizing
 
       def synchronized?
         value = page.instance_variable_get(:@lockstep_synchronized)
@@ -17,16 +23,19 @@ module Capybara
         page.instance_variable_set(:@lockstep_synchronized, value)
       end
 
-      ERROR_SNIPPET_MISSING = 'Cannot synchronize: Capybara::Lockstep JavaScript snippet is missing on page'
-      ERROR_PAGE_MISSING = 'Cannot synchronize before initial Capybara visit'
-      ERROR_ALERT_OPEN = 'Cannot synchronize while an alert is open'
-
       def synchronize(lazy: false)
-        if (lazy && synchronized?) || @synchronizing || disabled?
+        if (lazy && synchronized?) || synchronizing? || disabled?
           return
         end
 
-        @synchronizing = true
+        synchronize_now
+      end
+
+      private
+
+      def synchronize_now
+        self.synchronizing = true
+        self.synchronized = false
 
         log 'Synchronizing'
 
@@ -54,10 +63,8 @@ module Capybara
             case message_from_js
             when ERROR_PAGE_MISSING
               log(message_from_js)
-              self.synchronized = false
             when ERROR_SNIPPET_MISSING
               log(message_from_js)
-              self.synchronized = false
             else
               log message_from_js
               log "Synchronized successfully"
@@ -66,19 +73,30 @@ module Capybara
           end
         rescue ::Selenium::WebDriver::Error::UnexpectedAlertOpenError
           log ERROR_ALERT_OPEN
-          @synchronized = false
           # Don't raise an error, this will happen in an innocent test.
           # We will retry on the next Capybara synchronize call.
+        rescue ::Selenium::WebDriver::Error::JavascriptError => e
+          # When the URL changes while a script is running, my current selenium-webdriver
+          # raises a Selenium::WebDriver::Error::JavascriptError with the message:
+          # "javascript error: document unloaded while waiting for result".
+          # We will retry on the next Capybara synchronize call, by then we should see
+          # the new page.
+          if e.message.include?('unload')
+            log ERROR_NAVIGATED_AWAY
+          else
+            unhandled_synchronize_error(e)
+          end
         rescue StandardError => e
-          log "#{e.class.name} while synchronizing: #{e.message}"
-          @synchronized = false
-          raise e
+          unhandled_synchronize_error(e)
         ensure
-          @synchronizing = false
+          self.synchronizing = false
         end
       end
 
-      private
+      def unhandled_synchronize_error(e)
+        log "#{e.class.name} while synchronizing: #{e.message}"
+        raise e
+      end
 
       def page
         Capybara.current_session

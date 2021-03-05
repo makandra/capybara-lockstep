@@ -1,3 +1,4 @@
+require 'byebug'
 require "capybara-lockstep"
 
 RSpec.configure do |config|
