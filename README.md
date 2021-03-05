@@ -236,6 +236,9 @@ You can configure a different timeout:
 Capybara::Lockstep.timeout = 5 # seconds
 ```
 
+Regardless of the configured value capybara-lockstep will always wait *at least* for `Capybara.default_max_wait_time` seconds.
+
+
 ## Ruby API
 
 capybara-lockstep will automatically patch Capybara to wait for the browser after every command. **This should be enough for most test suites**.

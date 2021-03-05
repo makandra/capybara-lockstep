@@ -3,7 +3,8 @@ module Capybara
     module Configuration
 
       def timeout
-        @timeout || 10
+        seconds = @timeout || 10
+        [seconds, Capybara.default_max_wait_time].max
       end
 
       def timeout=(seconds)
