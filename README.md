@@ -227,7 +227,9 @@ Capybara::Lockstep.debug = Rails.logger
 
 ## Disabling synchronization
 
-If for some reason you want to disable browser synchronization for a while, you can do it like this:
+Sometimes you want to disable browser synchronization, e.g. to observe a loading spinner during a long-running request.
+
+To disable synchronization:
 
 ```ruby
 begin
