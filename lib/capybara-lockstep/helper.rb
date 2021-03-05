@@ -17,7 +17,13 @@ module Capybara
           tag_options[:nonce] = options.fetch(:nonce, true)
         end
 
-        javascript_tag(capybara_lockstep_js, tag_options)
+        full_js = capybara_lockstep_js
+
+        if (debug = options.fetch(:debug, Lockstep.debug?))
+          full_js += "\nCapybaraLockstep.debug = #{debug.to_json}"
+        end
+
+        javascript_tag(full_js, tag_options)
       end
 
     end

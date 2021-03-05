@@ -192,19 +192,31 @@ In casual testing I experienced a performance impact between +/- 10%.
 
 ## Debugging log
 
-capybara-lockstep can print to the console whenever it waits for the browser. To enable the log:
+You can enable extensive logging. This is useful to see whether capybara-lockstep has an effect on your tests, or to debug why synchronization is taking too long.
+
+To enable the log, say this before or during a test:
 
 ```ruby
 Capybara::Lockstep.debug = true
 ```
 
-You should now see messages like this during your test runs:
+You should now see messages like this on your standard output:
 
 ```
 [capybara-lockstep] Synchronizing
 [capybara-lockstep] Finished waiting for JavaScript
 [capybara-lockstep] Synchronized successfully
 ```
+
+You should also see messages like this in your browser's JavaScript console:
+
+```
+[capybara-lockstep] Started work: fetch /path [3 jobs]
+[capybara-lockstep] Finished work: fetch /path [2 jobs]
+```
+
+
+### Using a logger
 
 You may also configure logging to an existing logger object:
 
