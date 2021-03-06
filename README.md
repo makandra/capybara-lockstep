@@ -286,7 +286,7 @@ doAsynchronousWork().then(function() {
 })
 ```
 
-The string argument is used for logging (when logging is enabled). In this case you should see messages like this in your browser's JavaScript console:
+The string argument is used for logging (when logging is enabled). It does **not** need to be unique per job. In this case you should see messages like this in your browser's JavaScript console:
 
 ```text
 [capybara-lockstep] Started work: Eject warp core [1 jobs]
