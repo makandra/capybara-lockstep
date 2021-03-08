@@ -15,25 +15,16 @@ module Capybara
         @debug.nil? ? false : !!@debug
       end
 
-      def debug=(debug)
-        @debug = debug
-        if debug
-          target_prose = (is_logger?(debug) ? 'Ruby logger' : 'STDOUT')
+      def debug=(value)
+        @debug = value
+        if value
+          target_prose = (is_logger?(value) ? 'Ruby logger' : 'STDOUT')
           log "Logging to #{target_prose} and browser console"
         end
 
-        begin
-          with_max_wait_time(2) do
-            page.execute_script(<<~JS)
-              if (window.CapybaraLockstep) {
-                CapybaraLockstep.setDebug(#{debug.to_json})
-              }
-            JS
-          end
-        rescue StandardError => e
-          log "#{e.class.name} while enabling logs in browser: #{e.message}"
-          # Don't fail. The next page load will include the snippet with debugging enabled.
-        end
+        send_config_to_browser(<<~JS)
+          CapybaraLockstep.debug = #{value.to_json}
+        JS
 
         @debug
       end
@@ -58,6 +49,21 @@ module Capybara
 
       def javascript_driver?
         driver.is_a?(Capybara::Selenium::Driver)
+      end
+
+      def send_config_to_browser(js)
+        begin
+          with_max_wait_time(2) do
+            page.execute_script(<<~JS)
+              if (window.CapybaraLockstep) {
+                #{js}
+              }
+            JS
+          end
+        rescue StandardError => e
+          log "#{e.class.name} while configuring capybara-lockstep in browser: #{e.message}"
+          # Don't fail. The next page load will include the snippet with the new config.
+        end
       end
 
     end
