@@ -102,9 +102,9 @@ If you're not using Rails you can `include Capybara::Lockstep::Helper` and acces
 
 ### Signaling the end of page initialization
 
-Most web applications run some JavaScript after the document was loaded. This JavaScript enhances existing DOM elements ("hydration") or renders additional element into the DOM.
+Most web applications run some JavaScript after a document has initially loaded. Such JavaScript usually enhances existing DOM elements ("hydration") or renders additional element into the DOM.
 
-capybara-lockstep needs to know when your JavaScript is done hydrating and rendering, so it can automatically wait for initialization after every Capybara `visit()`.
+capybara-lockstep will synchronize more reliably if you signal when your JavaScript is done rendering the initial document. After the initial rendering, capybara-lockstep will automatically detect when the browser is busy, even if content is changed dynamically later.
 
 To signal that JavaScript is still initializing, your application layouts should render the `<body>` element with an `[data-initializing]` attribute:
 
@@ -112,9 +112,13 @@ To signal that JavaScript is still initializing, your application layouts should
 <body data-initializing>
 ```
 
-Your application JavaScript should remove the `[data-initializing]` attribute when it is done hydrating and rendering.
+Your application JavaScript should remove the `[data-initializing]` attribute when it is done rendering the initial page.
 
 More precisely, the attribute should be removed in the same [JavaScript task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/) ("tick") that will finish initializing. capybara-lockstep will assume that the page will be initialized by the end of this task.
+
+**After the initial rendering, capybara-lockstep will automatically detect when the browser is busy, even if content is changed dynamically later. After the initial page load you no longer need to add or remove the `[data-initializing]` attribute.**
+
+#### Example: Vanilla JS
 
 If all your initializing JavaScript runs synchronously on `DOMContentLoaded`, you can remove `[data-initializing]` in an event handler:
 
@@ -125,25 +129,41 @@ document.addEventListener('DOMContentLoaded', function() {
 })
 ```
 
-If you do any asynchronous initialization work (like lazy-loading another script) you should only remove `[data-initializing]` once that is done:
+If you call libraries during initialization, you may need to check the library code to see whether it finishes synchronously or asynchronously. Ideally a library offers a callback to notify you when it is done rendering:
 
 ```js
 document.addEventListener('DOMContentLoaded', function() {
-  import('huge-library').then(function({ hugeLibrary }) {
-    hugeLibrary.initialize()
+  Libary.initialize({
+    onFinished: function() {
+      document.body.removeAttribute('data-initializing')
+    })
+  })
+  setTimeout(function() { document.body.removeAttribute('data-initializing') })
+})
+```
+
+When a library offers no such callback, but you see in its code that the library delays work for a task, you must also wait another task to remove `[data-initializing]`:
+
+```js
+document.addEventListener('DOMContentLoaded', function() {
+  Libary.initialize()
+  setTimeout(function() { document.body.removeAttribute('data-initializing') })
+})
+```
+
+If your initialization code lazy-loads another script, you should only remove `[data-initializing]` once that is done:
+
+```js
+document.addEventListener('DOMContentLoaded', function() {
+  import('huge-library').then(function({ HugeLibrary }) {
+    HugeLibrary.initialize()
     document.body.removeAttribute('data-initializing')
   })
 })
 ```
 
-If you call libraries during initialization, you may need to check the library code to see whether it finishes synchronously or asynchronously. E.g. if you discover that a library delays work for a task, you must also wait another task to remove `[data-initializing]`:
 
-```js
-document.addEventListener('DOMContentLoaded', function() {
-  Libary.doWorkInNextTask()
-  setTimeout(function() { document.body.removeAttribute('data-initializing') })
-})
-```
+#### Example: Unpoly
 
 When you're using [Unpoly](https://unpoly.com/) initializing will usually happen synchronously in [compilers](https://unpoly.com/up.compiler). Hence a compiler is a good place to remove `[data-initializing]`:
 
@@ -152,6 +172,8 @@ up.compiler('body', function(body) {
   body.removeAttribute('data-initializing')
 })
 ```
+
+#### Example: AngularJS 1
 
 When you're using [AngularJS 1](https://unpoly.com/) initializing will usually happen synchronously in [directives](https://docs.angularjs.org/guide/directive). Hence a directive is a good place to remove `[data-initializing]`:
 
@@ -222,6 +244,14 @@ You may also configure logging to an existing logger object:
 
 ```ruby
 Capybara::Lockstep.debug = Rails.logger
+```
+
+### Logging in the browser only
+
+To enable logging in the browser console (but not STDOUT), include the snippet with `{ debug: true }`:
+
+```
+capybara_lockstep(debug: true)
 ```
 
 
