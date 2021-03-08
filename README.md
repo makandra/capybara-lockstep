@@ -330,11 +330,34 @@ You may omit the string argument, in which case nothing will be logged, but the 
 
 If you only load capybara-lockstep in tests you, should check for the `CapybaraLockstep` global to be defined before you interact with the JavaScript API.
 
-```
+```js
 if (window.CapybaraLockstep) {
   // interact with CapybaraLockstep
 }
 ```
+
+## Handling legacy promises
+
+Legacy promise implementations (like jQuery's `$.Deferred` and AngularJS' `$q`) work using tasks instead of microtasks. Their AJAX implementations (like `$.ajax()` and `$http`) use these promises to signal that a request is done.
+
+This means there is a time window in which all AJAX requests have finished, but their callbacks have not yet run:
+
+```js
+$.ajax('/foo').then(function() {
+  // This callback runs one task after the response was received
+})
+```
+
+It is theoretically possible that your test will observe the browser in that window, and expect content that has not been rendered yet. This will usually be mitigated by Capybara's retry logic. **If** you think that this is an issue for your test suite, you can configure capybara-headless to wait additional tasks before it considers the browser to be idle:
+
+```js
+Capybara:Lockstep.wait_tasks = 1
+```
+
+If you see longer `then()` chains in your code, you may need to configure a higher number of tasks to wait.
+
+This will have a negative performance impact on your test suite.
+
 
 ## Development
 

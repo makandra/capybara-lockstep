@@ -41,6 +41,20 @@ module Capybara
         @enabled = enabled
       end
 
+      def wait_tasks
+        @wait_tasks
+      end
+
+      def wait_tasks=(value)
+        @wait_tasks = value
+
+        send_config_to_browser(<<~JS)
+          CapybaraLockstep.waitTasks = #{value.to_json}
+        JS
+
+        @wait_tasks
+      end
+
       def disabled?
         !enabled?
       end
