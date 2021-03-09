@@ -38,17 +38,13 @@ How capybara-lockstep helps
 
 capybara-lockstep waits until the browser is idle before moving on to the next Capybara command. This greatly relieves the pressure on Capybara's retry logic.
 
-Whenever Capybara visits a new URL:
+Whenever Capybara visits a new URL or simulates a user interaction (clicking, typing, etc.):
 
 - capybara-lockstep waits for all document resources to load.
 - capybara-lockstep waits for client-side JavaScript to render or hydrate DOM elements.
 - capybara-lockstep waits for any AJAX requests.
 - capybara-lockstep waits for dynamically inserted `<script>`s to load (e.g. from [dynamic imports](https://webpack.js.org/guides/code-splitting/#dynamic-imports) or Analytics snippets).
-
-Whenever Capybara simulates a user interaction (clicking, typing, etc.):
-
-- capybara-lockstep waits for any AJAX requests.
-- capybara-lockstep waits for dynamically inserted `<script>`s to load (e.g. from [dynamic imports](https://webpack.js.org/guides/code-splitting/#dynamic-imports) or Analytics snippets).
+- capybara-lockstep waits for dynamically `<img>` or `<iframe>` elements to load.
 
 
 Installation
