@@ -89,7 +89,7 @@ module Capybara
         mod = Module.new do
           define_method meth do |*args, &block|
             super(*args, &block).tap do
-              Capybara::Lockstep.synchronized = false
+              Lockstep.synchronized = false
             end
           end
         end
