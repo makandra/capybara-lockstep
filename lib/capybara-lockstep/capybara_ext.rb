@@ -31,9 +31,55 @@ module Capybara
   end
 end
 
-
 Capybara::Session.class_eval do
   prepend Capybara::Lockstep::VisitWithWaiting
+end
+
+module Capybara
+  module Lockstep
+    module SynchronizeAroundScriptMethod
+
+      def synchronize_around_script_method(meth)
+        mod = Module.new do
+          define_method meth do |script, *args, &block|
+            # Synchronization uses execute_script itself, so don't synchronize when
+            # we're already synchronizing.
+            if !Lockstep.synchronizing?
+              # It's generally a good idea to synchronize before a JavaScript wants
+              # to access or observe an earlier state change.
+              #
+              # In case the given script navigates away (with `location.href = url`,
+              # `history.back()`, etc.) we would kill all in-flight requests. For this case
+              # we force a non-lazy synchronization so we pick up all client-side changes
+              # that have not been caused by Capybara commands.
+              script_may_navigate_away = script =~ /\b(location|history)\b/
+              Lockstep.log "Synchronizing before script: #{script}"
+              Lockstep.synchronize(lazy: !script_may_navigate_away)
+            end
+
+            super(script, *args, &block).tap do
+              if !Lockstep.synchronizing?
+                # We haven't yet synchronized with whatever changes the JavaScript
+                # did on the frontend.
+                Lockstep.synchronized = false
+              end
+            end
+          end
+        end
+        prepend(mod)
+      end
+
+    end
+  end
+end
+
+Capybara::Session.class_eval do
+  extend Capybara::Lockstep::SynchronizeAroundScriptMethod
+
+  synchronize_around_script_method :execute_script
+  synchronize_around_script_method :evaluate_async_script
+  # Don't synchronize around evaluate_script. It calls execute_script
+  # internally and we don't want to synchronize multiple times.
 end
 
 module Capybara
