@@ -12,13 +12,18 @@ module Capybara
 
         if visiting_remote_url
           # We're about to leave this screen, killing all in-flight requests.
-          Capybara::Lockstep.synchronize
+          # Give pending form submissions etc. a chance to finish before we tear down
+          # the browser environment.
+          #
+          # We force a non-lazy synchronization so we pick up all client-side changes
+          # that have not been caused by Capybara commands.
+          Lockstep.synchronize(lazy: false)
         end
 
         super(*args, &block).tap do
           if visiting_remote_url
-            # puts "After visit: unsynchronizing"
-            Capybara::Lockstep.synchronized = false
+            # We haven't yet synchronized the new screen.
+            Lockstep.synchronized = false
           end
         end
       end
