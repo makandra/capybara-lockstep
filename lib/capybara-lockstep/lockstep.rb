@@ -39,6 +39,8 @@ module Capybara
 
         log 'Synchronizing'
 
+        start_time = current_seconds
+
         begin
           with_max_wait_time(timeout) do
             message_from_js = evaluate_async_script(<<~JS)
@@ -67,7 +69,9 @@ module Capybara
               log(message_from_js)
             else
               log message_from_js
-              log "Synchronized successfully"
+              end_time = current_seconds
+              ms_elapsed = ((end_time.to_f - start_time) * 1000).round
+              log "Synchronized successfully [#{ms_elapsed} ms]"
               self.synchronized = true
             end
           end
@@ -122,6 +126,10 @@ module Capybara
         block.call
       rescue ::Selenium::WebDriver::Error::UnexpectedAlertOpenError
         # no-op
+      end
+
+      def current_seconds
+        Process.clock_gettime(Process::CLOCK_MONOTONIC)
       end
 
     end
