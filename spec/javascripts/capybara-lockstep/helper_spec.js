@@ -56,9 +56,54 @@ describe("CapybaraLockstep", function() {
 
   describe('handling of fetch() requests', function() {
 
-    it('is busy while the request is in flight')
+    it('is busy while the request is in flight', async function() {
+      fetch('https://httpstat.us/200/cors?sleep=500')
+      await waitTask()
+      expect(CapybaraLockstep).toBeBusy()
 
-    it('is idle when a request is aborted')
+      await waitTime(1500)
+      expect(CapybaraLockstep).toBeIdle()
+    })
+
+    it('is idle when a request is aborted', async function() {
+      let abortController = new AbortController()
+
+      fetch('https://httpstat.us/200/cors?sleep=1000', { signal: abortController.signal })
+      await waitTask()
+      expect(CapybaraLockstep).toBeBusy()
+
+      abortController.abort()
+      await waitTask()
+      expect(CapybaraLockstep).toBeIdle()
+    })
+
+  })
+
+  describe('handling of XHR requests', function() {
+
+    it('is busy while the request is in flight', async function() {
+      let xhr = new XMLHttpRequest()
+      xhr.open('GET', 'https://httpstat.us/200/cors?sleep=500')
+      xhr.send()
+      await waitTask()
+      expect(CapybaraLockstep).toBeBusy()
+
+      await waitTime(1500)
+      expect(CapybaraLockstep).toBeIdle()
+    })
+
+    it('is idle when a request is aborted', async function() {
+      let xhr = new XMLHttpRequest()
+      xhr.open('GET', 'https://httpstat.us/200/cors?sleep=500')
+      xhr.send()
+      await waitTask()
+      expect(CapybaraLockstep).toBeBusy()
+
+      xhr.abort()
+      await waitTask()
+      expect(CapybaraLockstep).toBeIdle()
+    })
+
   })
 
 })
