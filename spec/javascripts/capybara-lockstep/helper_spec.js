@@ -1,11 +1,13 @@
 describe("CapybaraLockstep", function() {
 
-  afterEach(function(done) {
+  beforeEach(function() {
+    CapybaraLockstep.debug = true
+  })
+
+  afterEach(async function() {
     // Wait for one task so any pending callbacks have a chance to stopWork()
-    setTimeout(function() {
-      CapybaraLockstep.reset()
-      done()
-    })
+    await waitTask()
+    CapybaraLockstep.reset()
   })
 
   it('is defined', function() {
@@ -50,6 +52,13 @@ describe("CapybaraLockstep", function() {
       expect(CapybaraLockstep).toBeIdle()
     })
 
+  })
+
+  describe('handling of fetch() requests', function() {
+
+    it('is busy while the request is in flight')
+
+    it('is idle when a request is aborted')
   })
 
 })
