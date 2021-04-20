@@ -31,6 +31,7 @@ GEM
       websocket-driver (~> 0.6)
     concurrent-ruby (1.1.8)
     diff-lcs (1.3)
+    gemika (0.6.0)
     i18n (1.8.9)
       concurrent-ruby (~> 1.0)
     jasmine (3.6.0)
@@ -86,9 +87,10 @@ DEPENDENCIES
   byebug
   capybara-lockstep!
   chrome_remote
+  gemika
   jasmine
   rake (~> 13.0)
   rspec (~> 3.0)
 
 BUNDLED WITH
-   2.2.12
+   2.2.14

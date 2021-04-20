@@ -12,3 +12,4 @@ gem 'jasmine'
 gem 'chrome_remote'
 
 gem 'byebug'
+gem 'gemika'
