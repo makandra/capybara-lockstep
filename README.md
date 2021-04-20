@@ -132,9 +132,8 @@ document.addEventListener('DOMContentLoaded', function() {
   Libary.initialize({
     onFinished: function() {
       document.body.removeAttribute('data-initializing')
-    })
+    }
   })
-  setTimeout(function() { document.body.removeAttribute('data-initializing') })
 })
 ```
 
