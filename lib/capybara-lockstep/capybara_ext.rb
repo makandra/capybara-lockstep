@@ -1,7 +1,9 @@
+require 'ruby2_keywords'
+
 module Capybara
   module Lockstep
     module VisitWithWaiting
-      def visit(*args, &block)
+      ruby2_keywords def visit(*args, &block)
         url = args[0]
         # Some of our apps have a Cucumber step that changes drivers mid-scenario.
         # It works by creating a new Capybara session and re-visits the URL from the
@@ -65,6 +67,7 @@ module Capybara
               end
             end
           end
+          ruby2_keywords meth
         end
         prepend(mod)
       end
@@ -92,6 +95,7 @@ module Capybara
               Lockstep.synchronized = false
             end
           end
+          ruby2_keywords meth
         end
         prepend(mod)
       end
@@ -138,7 +142,7 @@ end
 module Capybara
   module Lockstep
     module SynchronizeWithCatchUp
-      def synchronize(*args, &block)
+      ruby2_keywords def synchronize(*args, &block)
         # This method is called very frequently by capybara.
         # We use the { lazy } option to only synchronize when we're out of sync.
         Capybara::Lockstep.synchronize(lazy: true)

@@ -13,6 +13,7 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 - add changelog
 - add gemika for tests with github actions
+- add Ruby 3 support
 
 ## 0.6.0 - 2021-03-10
 ## 0.5.0 - 2021-03-09

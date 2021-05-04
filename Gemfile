@@ -9,6 +9,7 @@ gem "rake", "~> 13.0"
 
 gem "rspec", "~> 3.0"
 gem 'jasmine'
+gem 'thin' # ruby 3 does not include a webserver
 gem 'chrome_remote'
 
 gem 'byebug'
