@@ -249,22 +249,6 @@ To enable logging in the browser console (but not STDOUT), include the snippet w
 capybara_lockstep(debug: true)
 ```
 
-
-## Disabling synchronization
-
-Sometimes you want to disable browser synchronization, e.g. to observe a loading spinner during a long-running request.
-
-To disable synchronization:
-
-```ruby
-begin
-  Capybara::Lockstep.enabled = false
-  do_unsynchronized_work
-ensure
-  Capybara::Lockstep.enabled = true
-end
-```
-
 ## Synchronization timeout
 
 By default capybara-lockstep will wait `Capybara.default_max_wait_time` seconds for the page initialize and for JavaScript and AJAX request to finish.
@@ -299,6 +283,32 @@ You may also synchronize from your client-side JavaScript. The following will ru
 ```js
 CapybaraLockstep.synchronize(callback)
 ```
+
+
+## Disabling synchronization
+
+Sometimes you want to disable browser synchronization, e.g. to observe a loading spinner during a long-running request.
+
+To disable automatic synchronization:
+
+```ruby
+begin
+  Capybara::Lockstep.mode = :manual
+  do_unsynchronized_work
+ensure
+  Capybara::Lockstep.mode = :auto
+end
+```
+
+Note that you may still force synchronization by calling `Capybara::Lockstep.synchronize` manually.
+
+To completely disable synchronization:
+
+```ruby
+Capybara::Lockstep.mode = :off
+Capybara::Lockstep.synchronize # will not synchronize
+```
+
 
 ## Signaling asynchronous work
 

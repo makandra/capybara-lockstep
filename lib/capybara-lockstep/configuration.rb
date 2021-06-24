@@ -29,16 +29,30 @@ module Capybara
         @debug
       end
 
-      def enabled?
+      def mode
         if javascript_driver?
-          @enabled.nil? ? true : @enabled
+          @mode.nil? ? :auto : @mode
         else
-          false
+          :off
         end
       end
 
+      def mode=(mode)
+        @mode = mode
+      end
+
       def enabled=(enabled)
-        @enabled = enabled
+        case enabled
+        when true
+          log "Setting `Capybara::Lockstep.enabled = true` is deprecated. Set `Capybara::Lockstep.mode = :auto` instead."
+          self.mode = :auto
+        when false
+          log "Setting `Capybara::Lockstep.enabled = false` is deprecated. Set `Capybara::Lockstep.mode = :manual` or `Capybara::Lockstep.mode = :off` instead."
+          self.mode = :manual
+        when nil
+          # Reset to default
+          self.mode = nil
+        end
       end
 
       def wait_tasks
@@ -53,10 +67,6 @@ module Capybara
         JS
 
         @wait_tasks
-      end
-
-      def disabled?
-        !enabled?
       end
 
       private

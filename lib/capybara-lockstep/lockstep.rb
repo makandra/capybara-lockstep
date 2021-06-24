@@ -23,12 +23,24 @@ module Capybara
         page.instance_variable_set(:@lockstep_synchronized, value)
       end
 
-      def synchronize(lazy: false)
-        if (lazy && synchronized?) || synchronizing? || disabled?
+      def synchronize(lazy: false, log: nil)
+        if (lazy && synchronized?) || synchronizing? || mode == :off
           return
         end
 
+        # Allow passing a log message that is only logged
+        # when we're actually synchronizing.
+        if log
+          self.log(log)
+        end
+
         synchronize_now
+      end
+
+      def auto_synchronize(**options)
+        if mode == :auto
+          synchronize(**options)
+        end
       end
 
       private

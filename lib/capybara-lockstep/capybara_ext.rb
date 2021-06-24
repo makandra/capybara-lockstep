@@ -55,8 +55,7 @@ module Capybara
               # we force a non-lazy synchronization so we pick up all client-side changes
               # that have not been caused by Capybara commands.
               script_may_navigate_away = script =~ /\b(location|history)\b/
-              Lockstep.log "Synchronizing before script: #{script}"
-              Lockstep.synchronize(lazy: !script_may_navigate_away)
+              Lockstep.auto_synchronize(lazy: !script_may_navigate_away, log: "Synchronizing before script: #{script}")
             end
 
             super(script, *args, &block).tap do
@@ -143,9 +142,10 @@ module Capybara
   module Lockstep
     module SynchronizeWithCatchUp
       ruby2_keywords def synchronize(*args, &block)
-        # This method is called very frequently by capybara.
+        # This method is called by Capybara before most interactions with
+        # the browser. It is a different method than Capybara::Lockstep.synchronize!
         # We use the { lazy } option to only synchronize when we're out of sync.
-        Capybara::Lockstep.synchronize(lazy: true)
+        Capybara::Lockstep.auto_synchronize(lazy: true)
 
         super(*args, &block)
       end

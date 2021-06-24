@@ -20,13 +20,14 @@ describe Capybara::Lockstep do
   def stub_page
     @page = FakeCapybaraSession.new
     allow(subject).to receive(:page).and_return(@page)
-    allow(subject).to receive(:enabled?).and_return(true) # prevent driver class check
+    # Prevent Capybara::Lockstep from disabling itself on non-JS drivers
+    allow(subject).to receive(:javascript_driver?).and_return(true)
     allow(subject).to receive(:log)
   end
 
-  # before :each do
-  #   subject.debug = true
-  # end
+  after do
+    subject.mode = nil
+  end
 
   describe 'synchronize' do
 
@@ -108,6 +109,39 @@ describe Capybara::Lockstep do
         subject.synchronized = true
         expect(subject).not_to receive(:synchronize_now)
         subject.synchronize(lazy: true)
+      end
+
+    end
+
+    describe 'with mode = :off' do
+
+      it 'does not synchronize' do
+        stub_page
+        subject.mode = :off
+        expect(subject).not_to receive(:synchronize_now)
+        subject.synchronize
+      end
+
+    end
+
+    describe 'with mode = :auto' do
+
+      it 'synchronizes' do
+        stub_page
+        subject.mode = :auto
+        expect(subject).to receive(:synchronize_now)
+        subject.synchronize
+      end
+
+    end
+
+    describe 'with mode = :manual' do
+
+      it 'synchronizes' do
+        stub_page
+        subject.mode = :manual
+        expect(subject).to receive(:synchronize_now)
+        subject.synchronize
       end
 
     end
