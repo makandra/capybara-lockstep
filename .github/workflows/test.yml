@@ -43,4 +43,8 @@ jobs:
         gem install bundler:2.2.15
         bundle install --no-deployment
     - name: Run tests
-      run: bundle exec rake spec
+      uses: nick-invision/retry@v2
+      with:
+        timeout_seconds: 30
+        max_attempts: 3
+        command: bundle exec rake spec
