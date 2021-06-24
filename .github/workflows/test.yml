@@ -32,6 +32,12 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: "${{ matrix.ruby }}"
+    - uses: nanasess/setup-chromedriver@master
+    - name: Configure ChromeDriver and display server
+      run: |
+        export DISPLAY=:99
+        chromedriver --url-base=/wd/hub &
+        sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
     - name: Bundle
       run: |
         gem install bundler:2.2.15
