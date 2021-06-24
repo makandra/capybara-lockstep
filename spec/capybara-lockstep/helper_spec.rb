@@ -1,16 +1,10 @@
-require 'open3'
-
 describe Capybara::Lockstep::Helper do
-  class JavaScriptSpecsFailed < StandardError; end
 
   it 'passes JavaScript specs' do
-    stdout_str, _error_str, status = Open3.capture3('bundle exec rake jasmine:ci 2>&1')
-    if status.success?
-      # okay
-    else
-      raise JavaScriptSpecsFailed, stdout_str
-    end
-
+    require 'jasmine'
+    Jasmine.load_configuration_from_yaml
+    runner = Jasmine::CiRunner.new(Jasmine.config)
+    expect(runner.run).to be_truthy, 'JavaScript specs failed'
   end
 
 end
