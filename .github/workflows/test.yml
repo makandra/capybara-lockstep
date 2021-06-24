@@ -32,7 +32,8 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: "${{ matrix.ruby }}"
-    - uses: nanasess/setup-chromedriver@master
+    - name: Install ChromeDriver
+      uses: nanasess/setup-chromedriver@master
     - name: Configure ChromeDriver and display server
       run: |
         export DISPLAY=:99
