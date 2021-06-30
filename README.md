@@ -44,7 +44,7 @@ Whenever Capybara visits a new URL or simulates a user interaction (clicking, ty
 - capybara-lockstep waits for client-side JavaScript to render or hydrate DOM elements.
 - capybara-lockstep waits for any AJAX requests.
 - capybara-lockstep waits for dynamically inserted `<script>`s to load (e.g. from [dynamic imports](https://webpack.js.org/guides/code-splitting/#dynamic-imports) or Analytics snippets).
-- capybara-lockstep waits for dynamically `<img>` or `<iframe>` elements to load.
+- capybara-lockstep waits for dynamically inserted `<img>` or `<iframe>` elements to load.
 
 
 Installation
