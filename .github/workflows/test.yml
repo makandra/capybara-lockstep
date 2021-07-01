@@ -28,6 +28,12 @@ jobs:
       BUNDLE_GEMFILE: "${{ matrix.gemfile }}"
     steps:
     - uses: actions/checkout@v2
+    - name: Install Chrome
+      uses: browser-actions/setup-chrome@latest
+    - name: Show Chrome version
+      run: chrome --version
+    - name: Install ChromeDriver
+      uses: nanasess/setup-chromedriver@master
     - name: Install ruby
       uses: ruby/setup-ruby@v1
       with:
