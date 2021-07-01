@@ -61,7 +61,7 @@ describe("CapybaraLockstep", function() {
       await waitTask()
       expect(CapybaraLockstep).toBeBusy()
 
-      await waitTime(1500)
+      await waitTime(2500)
       expect(CapybaraLockstep).toBeIdle()
     })
 
@@ -88,7 +88,7 @@ describe("CapybaraLockstep", function() {
       await waitTask()
       expect(CapybaraLockstep).toBeBusy()
 
-      await waitTime(1500)
+      await waitTime(2500)
       expect(CapybaraLockstep).toBeIdle()
     })
 
