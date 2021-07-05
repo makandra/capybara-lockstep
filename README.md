@@ -253,7 +253,11 @@ capybara_lockstep(debug: true)
 
 By default capybara-lockstep will wait `Capybara.default_max_wait_time` seconds for the page initialize and for JavaScript and AJAX request to finish.
 
-When synchronization times out, capybara-lockstep will log but not raise an error.
+When synchronization times out, capybara-lockstep will [log](#debugging-log):
+
+```text
+[capybara-lockstep] Could not synchronize within 3 seconds
+```
 
 You can configure a different timeout:
 
@@ -261,10 +265,19 @@ You can configure a different timeout:
 Capybara::Lockstep.timeout = 5 # seconds
 ```
 
-To revert to defaulting to `Capybara.default_max_wait_time`, set the timeout to `nil`:
+By default Capybara will **not** raise an error after a timeout. You may occasionally get a slow server response, and Capybara will retry synchronization before the next interaction or `visit`. This is often good enough.
+
+If you want to be strict you may configure that an `Capybara::Lockstep::Timeout` error is raised after a timeout:
+
+```ruby
+Capybara::Lockstep.timeout_with = :error
+```
+
+To revert to defaults:
 
 ```ruby
 Capybara::Lockstep.timeout = nil
+Capybara::Lockstep.timeout_with = nil
 ```
 
 

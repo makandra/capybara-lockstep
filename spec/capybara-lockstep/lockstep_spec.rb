@@ -95,6 +95,23 @@ describe Capybara::Lockstep do
       subject.synchronize
     end
 
+    it "logs but does not fail if the synchronization does not complete within the configured timeout" do
+      stub_page
+      expect(@page).to receive(:evaluate_async_script).and_raise(Selenium::WebDriver::Error::ScriptTimeoutError)
+      expect(subject).to receive(:log).with(match /could not synchronize within [\d\.]+ seconds?/i)
+      expect { subject.synchronize }.to_not raise_error
+      expect(subject).not_to be_synchronized
+    end
+
+    it "raises an Caybara::Lockstep::Timeout if synchronization times out and .timeout_with = :error is also set" do
+      stub_page
+      subject.timeout_with = :error
+      expect(@page).to receive(:evaluate_async_script).and_raise(Selenium::WebDriver::Error::ScriptTimeoutError)
+      expect(subject).to receive(:log).with(match /could not synchronize within [\d\.]+ seconds?/i)
+      expect { subject.synchronize }.to raise_error(Capybara::Lockstep::Timeout, /could not synchronize within [\d\.]+ seconds?/i)
+      expect(subject).not_to be_synchronized
+    end
+
     describe 'with { lazy: true }' do
 
       it 'synchronizes when not synchronized' do

@@ -88,9 +88,14 @@ module Capybara
             end
           end
         rescue ::Selenium::WebDriver::Error::ScriptTimeoutError
-          log "Could not synchronize within #{timeout} seconds"
-          # Don't raise an error, this may happen if the server is slow to respond.
-          # We will retry on the next Capybara synchronize call.
+          timeout_message = "Could not synchronize within #{timeout} seconds"
+          log timeout_message
+          if timeout_with == :error
+            raise Timeout, timeout_message
+          else
+            # Don't raise an error, this may happen if the server is slow to respond.
+            # We will retry on the next Capybara synchronize call.
+          end
         rescue ::Selenium::WebDriver::Error::UnexpectedAlertOpenError
           log ERROR_ALERT_OPEN
           # Don't raise an error, this will happen in an innocent test.

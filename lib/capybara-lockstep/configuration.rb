@@ -10,6 +10,14 @@ module Capybara
         @timeout = seconds
       end
 
+      def timeout_with
+        @timeout_with.nil? ? :log : @timeout_with
+      end
+
+      def timeout_with=(action)
+        @timeout_with = action&.to_sym
+      end
+
       def debug?
         # @debug may also be a Logger object, so convert it to a boolean
         @debug.nil? ? false : !!@debug
@@ -38,7 +46,7 @@ module Capybara
       end
 
       def mode=(mode)
-        @mode = mode
+        @mode = mode&.to_sym
       end
 
       def enabled=(enabled)
