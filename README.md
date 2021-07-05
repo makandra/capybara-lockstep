@@ -1,12 +1,15 @@
 # capybara-lockstep
 
-This Ruby gem synchronizes [Capybara](https://github.com/teamcapybara/capybara) commands with client-side JavaScript and AJAX requests. This greatly improves the stability of a full-stack integration test suite, even if that suite has timing issues.
+This Ruby gem synchronizes [Capybara](https://github.com/teamcapybara/capybara) commands with client-side JavaScript and AJAX requests. This greatly improves the stability of an end-to-end ("E2E") test suite, even if that suite has timing issues.
+
+The next section explain why your test suite is flaky and how capybara-lockstep can help.\
+If you don't care you may skip to [installation instructions](#installation).
 
 
 Why are tests flaky?
 --------------------
 
-A naively written integration test will have [race conditions](https://makandracards.com/makandra/47336-fixing-flaky-integration-tests) between the test script and the controlled browser. How often these timing issues will fail your test depends on luck and your machine's performance. You may not see these issues for years until a colleague runs your suite on their new laptop.
+A naively written E2E test will have [race conditions](https://makandracards.com/makandra/47336-fixing-flaky-integration-tests) between the test script and the controlled browser. How often these timing issues will fail your test depends on luck and your machine's performance. You may not see these issues for years until a colleague runs your suite on their new laptop.
 
 Here is a typical example for a test that will fail with unlucky timing:
 
@@ -23,28 +26,48 @@ end
 
 This test has four timing issues that may cause it to fail:
 
-1. We click on the "New tweet" button, but the the JS event handler to open the tweet form wasn't registered yet.
+1. We click on the *New tweet* button, but the the JS event handler to open the tweet form wasn't registered yet.
 2. We start filling in the form, but it wasn't loaded yet.
 3. After sending the tweet we immediately navigate away, killing the form submission request that is still in flight. Hence the tweet will never appear in the next step.
 4. We look for the new tweet, but the timeline wasn't loaded yet.
 
-Capybara will retry individual commands or expectations when they fail. However, only issues **2** and **4** can be healed by retrying.
+[Capybara will retry](https://github.com/teamcapybara/capybara#asynchronous-javascript-ajax-and-friends) individual commands or expectations when they fail.\
+However, only issues **2** and **4** can be healed by retrying.
 
-While it is [possible](https://makandracards.com/makandra/47336-fixing-flaky-integration-tests) to remove most of the timing issues above, it requires skill and discipline. capybara-lockstep fixes issues **1**, **2**, **3** and **4** without any changes to the test code.
+While it is [possible](https://makandracards.com/makandra/47336-fixing-flaky-integration-tests) to remove most of the timing issues above, it requires skill and discipline.\
+capybara-lockstep fixes issues **1**, **2**, **3** and **4** without any changes to the test code.
+
+
+### This is a JavaScript problem
+
+The timing issues above will only manifest in an app where links, forms and buttons are handled by JavaScript.
+
+When all you have is standard HTML links and forms, stock Capybara will not see timing issues:
+
+- After a `visit()` Capybara/WebDriver will wait until the page is completely loaded
+- When following a link Capybara/WebDriver will wait until the link destination is completely loaded
+- When submitting a form Capybara/WebDriver will wait until the response is completely loaded
+
+However, when JavaScript handles a link click, you get **zero guarantees**.\
+Capybara/WebDriver **will not wait** for AJAX requests or any other async work.
+
 
 
 How capybara-lockstep helps
 ---------------------------
 
-capybara-lockstep waits until the browser is idle before moving on to the next Capybara command. This greatly relieves the pressure on Capybara's retry logic.
+capybara-lockstep waits until the browser is idle before moving on to the next Capybara command. This greatly relieves the pressure on [Capybara's retry logic](https://github.com/teamcapybara/capybara#asynchronous-javascript-ajax-and-friends).
 
-Whenever Capybara visits a new URL or simulates a user interaction (clicking, typing, etc.):
+Before Capybara simulates a user interaction (clicking, typing, etc.) or before it visits a new URL:
 
-- capybara-lockstep waits for all document resources to load.
-- capybara-lockstep waits for client-side JavaScript to render or hydrate DOM elements.
-- capybara-lockstep waits for any AJAX requests.
+- capybara-lockstep waits for all document resources to load (images, CSS, scripts, fonts, frames).
+- capybara-lockstep waits for any AJAX requests to finish.
+- capybara-lockstep waits for client-side JavaScript to [render or hydrate DOM elements](#signaling-late-page-initialization).
 - capybara-lockstep waits for dynamically inserted `<script>`s to load (e.g. from [dynamic imports](https://webpack.js.org/guides/code-splitting/#dynamic-imports) or Analytics snippets).
 - capybara-lockstep waits for dynamically inserted `<img>` or `<iframe>` elements to load.
+
+This covers most async work that causes flaky tests.\
+You can also configure capybara-lockstep to [wait for other async work](#signaling-asynchronous-work).
 
 
 Installation
@@ -76,33 +99,68 @@ And then execute:
 $ bundle install
 ```
 
-If you're not using Rails you should also `require 'capybara-lockstep'` in your `spec_helper.rb` (RSpec) or `env.rb` (Cucumber).
+If you're not using Rails you should also `require 'capybara-lockstep'` in your `spec_helper.rb` (RSpec), `test_helper.rb` (Minitest) or `env.rb` (Cucumber).
 
 
 ### Including the JavaScript snippet
 
 capybara-lockstep requires a JavaScript snippet to be embedded by the application under test. If that snippet is missing on a screen, capybara-lockstep will not be able to synchronize with the browser. In that case the test will continue without synchronization.
 
-If you're using Rails you can use the `capybara_lockstep` helper to insert the snippet into your application layouts:
+**If you're using Rails** you can use the `capybara_lockstep` helper to insert the snippet into your application layouts:
 
 ```erb
 <%= capybara_lockstep if Rails.env.test? %>
 ```
 
-Ideally the snippet should be included in the `<head>` before any other `<script>` tags. If that's impractical you will also see some benefit if you insert it later.
+Ideally the snippet should be included in the `<head>` before any other `<script>` tags.
 
-If you have a strict [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP), the `capybara_lockstep` helper will insert a CSP nonce by default. You can also pass a `:nonce` option.
+**If you're not using Rails** you can `include Capybara::Lockstep::Helper` and access the JavaScript with `capybara_lockstep_script`.
 
-If you're not using Rails you can `include Capybara::Lockstep::Helper` and access the JavaScript with `capybara_lockstep_script`.
+**If you have a strict [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)** the `capybara_lockstep` Rails helper will insert a CSP nonce by default. You can also pass an explicit nonce string using the `:nonce` option.
 
 
-### Signaling the end of page initialization
 
-Most web applications run some JavaScript after a document has initially loaded. Such JavaScript usually enhances existing DOM elements ("hydration") or renders additional element into the DOM.
+### Verify successful integration
 
-capybara-lockstep will synchronize more reliably if you signal when your JavaScript is done rendering the initial document. After the initial rendering, capybara-lockstep will automatically detect when the browser is busy, even if content is changed dynamically later.
+capybara-lockstep will automatically patch Capybara to wait for the browser after every command.
 
-To signal that JavaScript is still initializing, your application layouts should render the `<body>` element with an `[data-initializing]` attribute:
+Run your test suite to see if integration was successful and whether stability improves. During validation we recommend to activate the [debugging log](#debugging-log) before your test:
+
+```ruby
+Capybara::Lockstep.debug = true
+```
+
+You should see messages like this in your console:
+
+```text
+[capybara-lockstep] Synchronizing
+[capybara-lockstep] Finished waiting for JavaScript
+[capybara-lockstep] Synchronized successfully
+```
+
+Note that you may see some failures from tests with wrong assertions, which previously passed due to lucky timing.
+
+
+## Signaling late page initialization
+
+Most web applications run some JavaScript after a document has initially loaded, usually after the [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event) event. Such JavaScript often enhances existing DOM elements ("hydration") or renders additional element into the DOM.
+
+By default capybara-lockstep **waits for the document's `load` event** before allowing Capybara to interact with the page. You may trust that the following has already happened:
+
+- The complete DOM has been rendered.
+- The [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event) event has fired and its listeners have been called.
+- All linked resources (scripts, stylesheets, images, frames) have finished loading.
+- JavaScript from all `<script>` tags has been called. That includes inline, remote, `async` and `defer` scripts.
+- The [`load`](https://developer.mozilla.org/en-US/docs/Web/API/Window/load_event) event has fired and its listeners have been called.
+
+At this point most JavaScript applications are completely initialized and are safe to interact with. However, some code *may* do additional initialization work **after** the `load` event. For example:
+
+- Apps that intentionally split their rendering over multiple tasks as to not block the main thread. A prominent example for this is React in [concurrent mode](https://reactjs.org/blog/2021/06/08/the-plan-for-react-18.html).
+- [Unpoly](https://unpoly.com) in versions 0.x delays initialization until one task after the `DOMContentLoaded` event. This if fixed in versions 1.x and 2.x.
+
+**Only if your application is still initializing after the `load` event** you should signal capybara-lockstep when you're done rendering the initial document.
+
+To signal that JavaScript is still initializing, your application layouts can render the `<body>` element with an `[data-initializing]` attribute:
 
 ```html
 <body data-initializing>
@@ -112,90 +170,32 @@ Your application JavaScript should remove the `[data-initializing]` attribute wh
 
 More precisely, the attribute should be removed in the same [JavaScript task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/) ("tick") that will finish initializing. capybara-lockstep will assume that the page will be initialized by the end of this task.
 
-**After the initial rendering, capybara-lockstep will automatically detect when the browser is busy, even if content is changed dynamically later. After the initial page load you no longer need to add or remove the `[data-initializing]` attribute.**
+**After the initial page load you no longer need to add or remove the `[data-initializing]` attribute.** capybara-lockstep will automatically detect when the browser is busy, even if content is changed dynamically later. 
 
-#### Example: Vanilla JS
+### Example
 
-If all your initializing JavaScript runs synchronously on `DOMContentLoaded`, you can remove `[data-initializing]` in an event handler:
-
-```js
-document.addEventListener('DOMContentLoaded', function() {
-  // Initialize the page here
-  document.body.removeAttribute('data-initializing')
-})
-```
-
-If you call libraries during initialization, you may need to check the library code to see whether it finishes synchronously or asynchronously. Ideally a library offers a callback to notify you when it is done rendering:
+WYSIWYG editor. Because it's a large library we load, which is async work.
 
 ```js
-document.addEventListener('DOMContentLoaded', function() {
-  Libary.initialize({
-    onFinished: function() {
+document.addEventListener('DOMContentLoaded', async function() {
+  VisualEditor.initialize({
+    selector: 'textarea.wysiwyg',
+    plugins: ['image', 'table', 'spellcheck'],
+    onLoaded: function() {
       document.body.removeAttribute('data-initializing')
     }
   })
 })
 ```
 
-When a library offers no such callback, but you see in its code that the library delays work for a task, you must also wait another task to remove `[data-initializing]`:
+The example above uses an [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event) handler to hydrate the page and remove the `[data-initializing]` attribute. Depending on your architecture you may use other places for initialization:
 
-```js
-document.addEventListener('DOMContentLoaded', function() {
-  Libary.initialize()
-  setTimeout(function() { document.body.removeAttribute('data-initializing') })
-})
-```
+- [Custom Element constructor](https://developers.google.com/web/fundamentals/web-components/customelements)
+- [React component](https://reactjs.org/docs/components-and-props.html)
+- [Unpoly compiler](https://unpoly.com/up.compiler)
+- [AngularJS directive](https://docs.angularjs.org/guide/directive)
 
-If your initialization code lazy-loads another script, you should only remove `[data-initializing]` once that is done:
-
-```js
-document.addEventListener('DOMContentLoaded', function() {
-  import('huge-library').then(function({ HugeLibrary }) {
-    HugeLibrary.initialize()
-    document.body.removeAttribute('data-initializing')
-  })
-})
-```
-
-
-#### Example: Unpoly
-
-When you're using [Unpoly](https://unpoly.com/) initializing will usually happen synchronously in [compilers](https://unpoly.com/up.compiler). Hence a compiler is a good place to remove `[data-initializing]`:
-
-```js
-up.compiler('body', function(body) {
-  body.removeAttribute('data-initializing')
-})
-```
-
-#### Example: AngularJS 1
-
-When you're using [AngularJS 1](https://unpoly.com/) initializing will usually happen synchronously in [directives](https://docs.angularjs.org/guide/directive). Hence a directive is a good place to remove `[data-initializing]`:
-
-```js
-app.directive('body', function() {
-  return {
-    restrict: 'E',
-    link: function() {
-      document.body.removeAttribute('data-initializing')
-    }
-  }
-})
-```
-
-### Verify successful integration
-
-capybara-lockstep will automatically patch Capybara to wait for the browser after every command.
-
-Run your test suite to see if integration was successful and whether stability improves. During validation we recommend to activate `Capybara::Lockstep.debug = true` in your `spec_helper.rb` (RSpec) or `env.rb` (Cucumber). You should see messages like this in your console:
-
-```text
-[capybara-lockstep] Synchronizing
-[capybara-lockstep] Finished waiting for JavaScript
-[capybara-lockstep] Synchronized successfully
-```
-
-Note that you may see some failures from tests with wrong assertions, which sometimes passed due to lucky timing.
+If more than one component does late initialization, you may remove the `[data-initializing]` attribute in any of them, and immediately [signal async work](#signaling-asynchronous-work).
 
 
 ## Performance impact
@@ -204,7 +204,7 @@ capybara-lockstep may or may not impact the runtime of your test suite. It depen
 
 While waiting for the browser to be idle does take a few milliseconds, Capybara no longer needs to retry failed commands. You will also save time from not needing to re-run failed tests.
 
-In casual testing I experienced a performance impact between +/- 10%.
+In casual testing with large test suites I experienced a performance impact between +/- 10%.
 
 
 ## Debugging log
@@ -243,9 +243,9 @@ Capybara::Lockstep.debug = Rails.logger
 
 ### Logging in the browser only
 
-To enable logging in the browser console (but not STDOUT), include the snippet with `{ debug: true }`:
+To enable logging in the browser console (but not STDOUT), include the [JavaScript snippet](#including-the-javascript-snippet) with `{ debug: true }`:
 
-```
+```ruby
 capybara_lockstep(debug: true)
 ```
 
@@ -300,7 +300,7 @@ ensure
 end
 ```
 
-Note that you may still force synchronization by calling `Capybara::Lockstep.synchronize` manually.
+In the `:manual` mode you may still force synchronization by calling `Capybara::Lockstep.synchronize` manually.
 
 To completely disable synchronization:
 
@@ -364,16 +364,31 @@ If you see longer `then()` chains in your code, you may need to configure a high
 This will have a negative performance impact on your test suite.
 
 
-## Development
-
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
-
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
-
-
 ## Contributing
 
 Pull requests are welcome on GitHub at <https://github.com/makandra/capybara-lockstep>.
+
+After checking out the repo, run `bin/setup` to install dependencies.
+
+Then, run `rake spec` to run the tests.
+
+You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+
+### Manually testing a change
+
+To test an unrelased change with a test suite, we recommend to temporarily link the local repository from your test suites's `Gemfile`:
+
+```ruby
+gem 'capybara-lockstep', path: '../capybara-lockstep'
+```
+
+As an alternative you may also install this gem onto your local machine by running `bundle exec rake install`.
+
+### Releasing a new version
+
+- Update the version number in `version.rb`
+ - Run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+ - If RubyGems publishing seems to freeze, try entering your OTP code.
 
 
 ## License
