@@ -68,6 +68,8 @@ module Capybara
               if (protocol === 'data:' || protocol == 'about:') {
                 done(#{ERROR_PAGE_MISSING.to_json})
               } else if (document.readyState === 'complete') {
+                // WebDriver always waits for the `load` event after a visit(),
+                // unless a different page load strategy was configured.
                 synchronize()
               } else {
                 window.addEventListener('load', synchronize)
