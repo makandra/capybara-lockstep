@@ -60,9 +60,9 @@ capybara-lockstep waits until the browser is idle before moving on to the next C
 
 Before Capybara simulates a user interaction (clicking, typing, etc.) or before it visits a new URL:
 
-- capybara-lockstep waits for all document resources to load (images, CSS, scripts, fonts, frames).
+- capybara-lockstep waits for all document resources to load (images, CSS, fonts, frames).
 - capybara-lockstep waits for any AJAX requests to finish.
-- capybara-lockstep waits for client-side JavaScript to [render or hydrate DOM elements](#signaling-late-page-initialization).
+- capybara-lockstep waits for client-side JavaScript to render or hydrate DOM elements.
 - capybara-lockstep waits for dynamically inserted `<script>`s to load (e.g. from [dynamic imports](https://webpack.js.org/guides/code-splitting/#dynamic-imports) or Analytics snippets).
 - capybara-lockstep waits for dynamically inserted `<img>` or `<iframe>` elements to load.
 
@@ -139,63 +139,6 @@ You should see messages like this in your console:
 ```
 
 Note that you may see some failures from tests with wrong assertions, which previously passed due to lucky timing.
-
-
-## Signaling late page initialization
-
-Most web applications run some JavaScript after a document has initially loaded, usually after the [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event) event. Such JavaScript often enhances existing DOM elements ("hydration") or renders additional element into the DOM.
-
-By default capybara-lockstep **waits for the document's `load` event** before allowing Capybara to interact with the page. You may trust that the following has already happened:
-
-- The complete DOM has been rendered.
-- The [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event) event has fired and its listeners have been called.
-- All linked resources (scripts, stylesheets, images, frames) have finished loading.
-- JavaScript from all `<script>` tags has been called. That includes inline, remote, `async` and `defer` scripts.
-- The [`load`](https://developer.mozilla.org/en-US/docs/Web/API/Window/load_event) event has fired and its listeners have been called.
-
-At this point most JavaScript applications are completely initialized and are safe to interact with. However, some code *may* do additional initialization work **after** the `load` event. For example:
-
-- Apps that intentionally split their rendering over multiple tasks as to not block the main thread. A prominent example for this is React in [concurrent mode](https://reactjs.org/blog/2021/06/08/the-plan-for-react-18.html).
-- [Unpoly](https://unpoly.com) in versions 0.x delays initialization until one task after the `DOMContentLoaded` event. This if fixed in versions 1.x and 2.x.
-
-**Only if your application is still initializing after the `load` event** you should signal capybara-lockstep when you're done rendering the initial document.
-
-To signal that JavaScript is still initializing, your application layouts can render the `<body>` element with an `[data-initializing]` attribute:
-
-```html
-<body data-initializing>
-```
-
-Your application JavaScript should remove the `[data-initializing]` attribute when it is done rendering the initial page.
-
-More precisely, the attribute should be removed in the same [JavaScript task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/) ("tick") that will finish initializing. capybara-lockstep will assume that the page will be initialized by the end of this task.
-
-**After the initial page load you no longer need to add or remove the `[data-initializing]` attribute.** capybara-lockstep will automatically detect when the browser is busy, even if content is changed dynamically later. 
-
-### Example
-
-WYSIWYG editor. Because it's a large library we load, which is async work.
-
-```js
-document.addEventListener('DOMContentLoaded', async function() {
-  VisualEditor.initialize({
-    selector: 'textarea.wysiwyg',
-    plugins: ['image', 'table', 'spellcheck'],
-    onLoaded: function() {
-      document.body.removeAttribute('data-initializing')
-    }
-  })
-})
-```
-
-The example above uses an [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event) handler to hydrate the page and remove the `[data-initializing]` attribute. Depending on your architecture you may use other places for initialization:
-
-- [Custom Element constructor](https://developers.google.com/web/fundamentals/web-components/customelements)
-- [React component](https://reactjs.org/docs/components-and-props.html)
-- [Unpoly compiler](https://unpoly.com/up.compiler)
-- [AngularJS directive](https://docs.angularjs.org/guide/directive)
-
-If more than one component does late initialization, you may remove the `[data-initializing]` attribute in any of them, and immediately [signal async work](#signaling-asynchronous-work).
 
 
 ## Performance impact
