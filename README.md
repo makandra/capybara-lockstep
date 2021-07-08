@@ -58,11 +58,17 @@ How capybara-lockstep helps
 
 capybara-lockstep waits until the browser is idle before moving on to the next Capybara command. This greatly relieves the pressure on [Capybara's retry logic](https://github.com/teamcapybara/capybara#asynchronous-javascript-ajax-and-friends).
 
-Before Capybara simulates a user interaction (clicking, typing, etc.) or before it visits a new URL:
+capybara-lockstep synchronizes before:
 
-- capybara-lockstep waits for all document resources to load (images, CSS, fonts, frames).
-- capybara-lockstep waits for any AJAX requests to finish.
-- capybara-lockstep waits for client-side JavaScript to render or hydrate DOM elements.
+- Capybara simulates a user interaction (clicking, typing, etc.)
+- Capybara visits a new URL
+- Capybara executes JavaScript
+
+When capybara-lockstep synchronizes it will:
+
+- wait for all document resources to load (images, CSS, fonts, frames).
+- wait for client-side JavaScript to render or hydrate DOM elements.
+- wait for any pending AJAX requests to finish and their callbacks to be called.
 - capybara-lockstep waits for dynamically inserted `<script>`s to load (e.g. from [dynamic imports](https://webpack.js.org/guides/code-splitting/#dynamic-imports) or Analytics snippets).
 - capybara-lockstep waits for dynamically inserted `<img>` or `<iframe>` elements to load.
 
@@ -146,22 +152,24 @@ Note that you may see some failures from tests with wrong assertions, which prev
 
 ## Signaling asynchronous work
 
-By default capybara-lockstep blocks all async work that 
+By default capybara-lockstep waits until resources have loaded, AJAX requests have finished and their callbacks have been called.
 
-If for some reason you want capybara-lockstep to consider additional asynchronous work as "busy", you can do so:
+You can configure capybara-lockstep to wait for other async work that does not involve the network. Let's say we have an animation that fades in a new element over 2 seconds. The following will prevent Capybara from observing the page while the animation is running:
 
 ```js
-CapybaraLockstep.startWork('Eject warp core')
-doAsynchronousWork().then(function() {
-  CapybaraLockstep.stopWork('Eject warp core')
-})
+async function fadeIn(element) {
+  CapybaraLockstep.startWork('Animation')
+  startAnimation(element, 'fade-in')
+  await waitForAnimationEnd(element)
+  CapybaraLockstep.stopWork('Animation')
+}
 ```
 
 The string argument is used for logging (when logging is enabled). It does **not** need to be unique per job. In this case you should see messages like this in your browser's JavaScript console:
 
 ```text
-[capybara-lockstep] Started work: Eject warp core [1 jobs]
-[capybara-lockstep] Finished work: Eject warp core [0 jobs]
+[capybara-lockstep] Started work: Animation [1 jobs]
+[capybara-lockstep] Finished work: Animation [0 jobs]
 ```
 
 You may omit the string argument, in which case nothing will be logged, but the work will still be tracked.
