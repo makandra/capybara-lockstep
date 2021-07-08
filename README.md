@@ -117,7 +117,7 @@ capybara-lockstep requires a JavaScript snippet to be embedded by the applicatio
 **If you're using Rails** you can use the `capybara_lockstep` helper to insert the snippet into your application layouts:
 
 ```erb
-<%= capybara_lockstep if Rails.env.test? %>
+<%= capybara_lockstep if defined?(Capybara::Lockstep) %>
 ```
 
 Ideally the snippet should be included in the `<head>` before any other `<script>` tags.
@@ -183,6 +183,12 @@ If you only load capybara-lockstep in tests you, should check for the `CapybaraL
 if (window.CapybaraLockstep) {
   // interact with CapybaraLockstep
 }
+```
+
+If you can use ES6 you may also use [optional chaining](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining) to only call a function if `window.CapybaraLockstep` is defined:
+
+```js
+window.CapybaraLockstep?.startWork('Work')
 ```
 
 
