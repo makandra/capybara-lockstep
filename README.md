@@ -66,8 +66,10 @@ Before Capybara simulates a user interaction (clicking, typing, etc.) or before 
 - capybara-lockstep waits for dynamically inserted `<script>`s to load (e.g. from [dynamic imports](https://webpack.js.org/guides/code-splitting/#dynamic-imports) or Analytics snippets).
 - capybara-lockstep waits for dynamically inserted `<img>` or `<iframe>` elements to load.
 
-This covers most async work that causes flaky tests.\
-You can also configure capybara-lockstep to [wait for other async work](#signaling-asynchronous-work).
+In summary Capybara can no longer observe the page while HTTP requests are in flight.
+This covers most async work that causes flaky tests.
+
+You can also configure capybara-lockstep to [wait for other async work](#signaling-asynchronous-work) that does not involve the network, like animations.
 
 
 Installation
@@ -139,6 +141,41 @@ You should see messages like this in your console:
 ```
 
 Note that you may see some failures from tests with wrong assertions, which previously passed due to lucky timing.
+
+
+
+## Signaling asynchronous work
+
+By default capybara-lockstep blocks all async work that 
+
+If for some reason you want capybara-lockstep to consider additional asynchronous work as "busy", you can do so:
+
+```js
+CapybaraLockstep.startWork('Eject warp core')
+doAsynchronousWork().then(function() {
+  CapybaraLockstep.stopWork('Eject warp core')
+})
+```
+
+The string argument is used for logging (when logging is enabled). It does **not** need to be unique per job. In this case you should see messages like this in your browser's JavaScript console:
+
+```text
+[capybara-lockstep] Started work: Eject warp core [1 jobs]
+[capybara-lockstep] Finished work: Eject warp core [0 jobs]
+```
+
+You may omit the string argument, in which case nothing will be logged, but the work will still be tracked.
+
+
+## Note on interacting with the JavaScript API
+
+If you only load capybara-lockstep in tests you, should check for the `CapybaraLockstep` global to be defined before you interact with the JavaScript API.
+
+```js
+if (window.CapybaraLockstep) {
+  // interact with CapybaraLockstep
+}
+```
 
 
 ## Performance impact
@@ -266,36 +303,6 @@ Capybara::Lockstep.synchronize # will not synchronize
 ```
 
 
-## Signaling asynchronous work
-
-If for some reason you want capybara-lockstep to consider additional asynchronous work as "busy", you can do so:
-
-```js
-CapybaraLockstep.startWork('Eject warp core')
-doAsynchronousWork().then(function() {
-  CapybaraLockstep.stopWork('Eject warp core')
-})
-```
-
-The string argument is used for logging (when logging is enabled). It does **not** need to be unique per job. In this case you should see messages like this in your browser's JavaScript console:
-
-```text
-[capybara-lockstep] Started work: Eject warp core [1 jobs]
-[capybara-lockstep] Finished work: Eject warp core [0 jobs]
-```
-
-You may omit the string argument, in which case nothing will be logged, but the work will still be tracked.
-
-
-## Note on interacting with the JavaScript API
-
-If you only load capybara-lockstep in tests you, should check for the `CapybaraLockstep` global to be defined before you interact with the JavaScript API.
-
-```js
-if (window.CapybaraLockstep) {
-  // interact with CapybaraLockstep
-}
-```
 
 ## Handling legacy promises
 
