@@ -332,8 +332,8 @@ $.ajax('/foo').then(function() {
 
 It is theoretically possible that your test will observe the browser in that window, and expect content that has not been rendered yet. This will usually be mitigated by Capybara's retry logic. **If** you think that this is an issue for your test suite, you can configure capybara-headless to wait additional tasks before it considers the browser to be idle:
 
-```js
-Capybara:Lockstep.wait_tasks = 1
+```ruby
+Capybara::Lockstep.wait_tasks = 1
 ```
 
 If you see longer `then()` chains in your code, you may need to configure a higher number of tasks to wait.
