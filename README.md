@@ -320,25 +320,29 @@ Capybara::Lockstep.synchronize # will not synchronize
 
 ## Handling legacy promises
 
-Legacy promise implementations (like jQuery's `$.Deferred` and AngularJS' `$q`) work using tasks instead of microtasks. Their AJAX implementations (like `$.ajax()` and `$http`) use these promises to signal that a request is done.
+Legacy promise implementations (like jQuery's `$.Deferred` and AngularJS' `$q`) work using [tasks instead of microtasks](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/). Their AJAX implementations (like `$.ajax()` and `$http`) use task-based promises to signal that a request is done.
 
 This means there is a time window in which all AJAX requests have finished, but their callbacks have not yet run:
 
 ```js
-$.ajax('/foo').then(function() {
+$http.get('/foo').then(function() {
   // This callback runs one task after the response was received
 })
 ```
 
-It is theoretically possible that your test will observe the browser in that window, and expect content that has not been rendered yet. This will usually be mitigated by Capybara's retry logic. **If** you think that this is an issue for your test suite, you can configure capybara-headless to wait additional tasks before it considers the browser to be idle:
+It is theoretically possible that your test will observe the browser in that window, and expect content that has not been rendered yet. Affected code must call `then()` on a task-based promise **or** use `setTimeout()` to push work into the next task.
+
+Any issues caused by this will usually be mitigated by Capybara's retry logic. **If** you think that this is an issue for your test suite, you can configure capybara-headless to wait additional tasks before it considers the browser to be idle:
 
 ```ruby
 Capybara::Lockstep.wait_tasks = 1
 ```
 
-If you see longer `then()` chains in your code, you may need to configure a higher number of tasks to wait.
+If you see longer chains of `then()` or nested `setTimeout()` calls in your code, you may need to configure a higher number of tasks to wait.
 
-This will have a negative performance impact on your test suite.
+Waiting additional tasks will have a negative performance impact on your test suite.
+
+> **Note:** When capybara-lockstep detects jQuery on the page, it will automatically patch [`$.ajax()`](https://api.jquery.com/jQuery.ajax/) to wait an additional task after the response was received. If your only concern is callbacks to `$.ajax()` you do not need so set `Capybara::Lockstep.wait_tasks`.
 
 
 ## Contributing
