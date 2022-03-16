@@ -2,6 +2,10 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## 1.1.1 - 2022-03-16
+
+- Activate rubygems MFA
+
 ## 1.1.0
 
 - Stop handling of `[data-initializing]` attribute. Apps that have late initialization after the `load` event can just use `CapybaraLockstep.startWork()`.
