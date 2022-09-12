@@ -2,6 +2,39 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## 1.2.0 - 2022-09-12
+
+### Synchronization around history navigation
+
+We now synchronize before and after history navigation using the following Capybara methods:
+
+- `page.refresh`
+- `page.go_back`
+- `page.go_forward`
+
+We also synchronize before `current_url` in case running a JavaScript task wants to update the URL when done.
+
+### Support for tests with multiple tabs or frames
+
+capybara-lockstep now supports test that work with [multiple frames](https://makandracards.com/makandra/34015-use-capybara-commands-inside-an-iframe) or [multiple tabs or windows](https://github.com/teamcapybara/capybara#working-with-windows).
+We now synchronize before and after the following Capybara methods:
+
+- `switch_to_frame`
+- `within_frame`
+- `switch_to_window`
+- `within_window`
+
+### Improved logging
+
+- Only log when we're actually synchronizing
+- Log the reason why we're synchronizing (e.g. before node access)
+- Log which browser work we're waiting for (e.g. XHR request, image load)
+
+### Various changes
+
+- Synchronize before accessing `page.html`.
+
+
 ## 1.1.1 - 2022-03-16
 
 - Activate rubygems MFA
