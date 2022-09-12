@@ -1,7 +1,7 @@
 module Capybara
   module Lockstep
     ERROR_SNIPPET_MISSING = 'Cannot synchronize: capybara-lockstep JavaScript snippet is missing'
-    ERROR_PAGE_MISSING = 'Cannot synchronize before initial Capybara visit'
+    ERROR_PAGE_MISSING = 'Cannot synchronize with empty page'
     ERROR_ALERT_OPEN = 'Cannot synchronize while an alert is open'
     ERROR_NAVIGATED_AWAY = "Browser navigated away while synchronizing"
 
@@ -85,8 +85,8 @@ module Capybara
                   done(#{ERROR_SNIPPET_MISSING.to_json})
                 }
               }
-              let protocol = location.protocol
-              if (protocol === 'data:' || protocol == 'about:') {
+              const emptyDataURL = /^data:[^,]*,?$/
+              if (emptyDataURL.test(location.href) || location.protocol === 'about:') {
                 done(#{ERROR_PAGE_MISSING.to_json})
               } else if (document.readyState === 'complete') {
                 // WebDriver always waits for the `load` event after a visit(),
