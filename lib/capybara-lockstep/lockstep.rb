@@ -13,7 +13,17 @@ module Capybara
       alias synchronizing? synchronizing
 
       def synchronized?
+        # The synchronized flag is per-session (page == Capybara.current_session).
+        # This enables tests that use more than one browser, e.g. to test multi-user interaction:
+        # https://makandracards.com/makandra/474480-how-to-make-a-cucumber-test-work-with-multiple-browser-sessions
+        #
+        # Ideally the synchronized flag would also be per-tab, per-frame and per-document.
+        # We haven't found a way to patch this into Capybara, as there does not seem to be
+        # a persistent object representing a document. Capybara::Node::Document just seems to
+        # be a proxy accessing whatever is the current document. The way we work around this
+        # is that we synchronize before switching tabs or frames.
         value = page.instance_variable_get(:@lockstep_synchronized)
+
         # We consider a new Capybara session to be synchronized.
         # This will be set to false after our first visit().
         value.nil? ? true : value
@@ -24,6 +34,20 @@ module Capybara
       end
 
       def synchronize(lazy: false, log: nil)
+        # The { lazy } option is a performance optimization that will prevent capybara-lockstep
+        # from synchronizing multiple times in expressions like `page.find('.foo').find('.bar')`.
+        # The { lazy } option has nothing todo with :auto mode.
+        #
+        # With { lazy: true } we only synchronize when the Ruby-side thinks we're out of sync.
+        # This saves us an expensive execute_script() roundtrip that goes to the browser and back.
+        # However the knowledge of the Ruby-side is limited: We only assume that we're out of sync
+        # after a page load or after a Capybara command. There may be additional client-side work
+        # that the Ruby-side is not aware of, e.g. an AJAX call scheduled by a timeout.
+        #
+        # With { lazy: false } we force synchronization with the browser, whether the Ruby-side
+        # thinks we're in sync or not. This always makes an execute_script() rountrip, but picks up
+        # non-lazy synchronization so we pick up client-side work that have not been caused
+        # by Capybara commands.
         if (lazy && synchronized?) || synchronizing? || mode == :off
           return
         end
@@ -31,6 +55,9 @@ module Capybara
         synchronize_now(log: log)
       end
 
+      # Automatic synchronization from within the capybara-lockstep should always call #auto_synchronize.
+      # This only synchronizes IFF in :auto mode, i.e. the user has not explicitly disabled automatic syncing.
+      # The :auto mode has nothing to do with the { lazy } option.
       def auto_synchronize(**options)
         if mode == :auto
           synchronize(**options)
