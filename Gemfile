@@ -14,3 +14,5 @@ gem 'chrome_remote'
 
 gem 'byebug'
 gem 'gemika'
+
+gem 'activesupport', '~> 6.0'
