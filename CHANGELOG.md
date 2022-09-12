@@ -2,6 +2,11 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+
+## 1.2.1 - 2022-09-12
+
+- Synchronize with pages constructed from non-empty [data URLs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs)
+
 ## 1.2.0 - 2022-09-12
 
 ### Synchronization around history navigation
