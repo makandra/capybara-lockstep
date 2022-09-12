@@ -2,17 +2,80 @@ require 'ruby2_keywords'
 
 module Capybara
   module Lockstep
+    module UnsychronizeAfter
+      def unsychronize_after(meth)
+        mod = Module.new do
+          define_method meth do |*args, &block|
+            super(*args, &block)
+          ensure
+            Lockstep.synchronized = false
+          end
+
+          ruby2_keywords meth
+        end
+
+        prepend(mod)
+      end
+    end
+  end
+end
+
+module Capybara
+  module Lockstep
+    module SynchronizeBefore
+      def synchronize_before(meth, lazy:)
+        mod = Module.new do
+          define_method meth do |*args, &block|
+            Lockstep.auto_synchronize(lazy: lazy, log: "Synchronizing before ##{meth}")
+            super(*args, &block)
+          end
+
+          ruby2_keywords meth
+        end
+
+        prepend(mod)
+      end
+    end
+  end
+end
+
+Capybara::Session.class_eval do
+  extend Capybara::Lockstep::SynchronizeBefore
+  extend Capybara::Lockstep::UnsychronizeAfter
+
+  synchronize_before :html, lazy: true # wait until running JavaScript has updated the DOM
+
+  synchronize_before :current_url, lazy: true # wait until running JavaScript has updated the URL
+
+  synchronize_before :refresh, lazy: false # wait until running JavaScript has updated the URL
+  unsychronize_after :refresh # new document is no longer synchronized
+
+  synchronize_before :go_back, lazy: false # wait until running JavaScript has updated the URL
+  unsychronize_after :go_back # new document is no longer synchronized
+
+  synchronize_before :go_forward, lazy: false # wait until running JavaScript has updated the URL
+  unsychronize_after :go_forward # new document is no longer synchronized
+
+  synchronize_before :switch_to_frame, lazy: true # wait until the current frame is done processing
+  unsychronize_after :switch_to_frame # now that we've switched into the new frame, we don't know the document's synchronization state.
+
+  synchronize_before :switch_to_window, lazy: true # wait until the current frame is done processing
+  unsychronize_after :switch_to_window # now that we've switched to the new window, we don't know the document's synchronization state.
+end
+
+module Capybara
+  module Lockstep
     module VisitWithWaiting
-      ruby2_keywords def visit(*args, &block)
+      def visit(*args, &block)
         url = args[0]
         # Some of our apps have a Cucumber step that changes drivers mid-scenario.
         # It works by creating a new Capybara session and re-visits the URL from the
         # previous session. If this happens before a URL is ever loaded,
         # it re-visits the URL "data:", which will never "finish" initializing.
         # Also when opening a new tab via Capybara, the initial URL is about:blank.
-        visiting_remote_url = !(url.start_with?('data:') || url.start_with?('about:'))
+        visiting_real_url = !(url.start_with?('data:') || url.start_with?('about:'))
 
-        if visiting_remote_url
+        if visiting_real_url
           # We're about to leave this screen, killing all in-flight requests.
           # Give pending form submissions etc. a chance to finish before we tear down
           # the browser environment.
@@ -23,12 +86,14 @@ module Capybara
         end
 
         super(*args, &block).tap do
-          if visiting_remote_url
+          if visiting_real_url
             # We haven't yet synchronized the new screen.
             Lockstep.synchronized = false
           end
         end
       end
+
+      ruby2_keywords :visit
     end
   end
 end
@@ -58,14 +123,15 @@ module Capybara
               Lockstep.auto_synchronize(lazy: !script_may_navigate_away, log: "Synchronizing before script: #{script}")
             end
 
-            super(script, *args, &block).tap do
-              if !Lockstep.synchronizing?
-                # We haven't yet synchronized with whatever changes the JavaScript
-                # did on the frontend.
-                Lockstep.synchronized = false
-              end
+            super(script, *args, &block)
+          ensure
+            if !Lockstep.synchronizing?
+              # We haven't yet synchronized with whatever changes the JavaScript
+              # did on the frontend.
+              Lockstep.synchronized = false
             end
           end
+
           ruby2_keywords meth
         end
         prepend(mod)
@@ -82,24 +148,6 @@ Capybara::Session.class_eval do
   synchronize_around_script_method :evaluate_async_script
   # Don't synchronize around evaluate_script. It calls execute_script
   # internally and we don't want to synchronize multiple times.
-end
-
-module Capybara
-  module Lockstep
-    module UnsychronizeAfter
-      def unsychronize_after(meth)
-        mod = Module.new do
-          define_method meth do |*args, &block|
-            super(*args, &block).tap do
-              Lockstep.synchronized = false
-            end
-          end
-          ruby2_keywords meth
-        end
-        prepend(mod)
-      end
-    end
-  end
 end
 
 # Capybara 3 has driver-specific Node classes which sometimes
@@ -141,7 +189,7 @@ end
 module Capybara
   module Lockstep
     module SynchronizeWithCatchUp
-      ruby2_keywords def synchronize(*args, &block)
+      def synchronize(*args, &block)
         # This method is called by Capybara before most interactions with
         # the browser. It is a different method than Capybara::Lockstep.synchronize!
         # We use the { lazy } option to only synchronize when we're out of sync.
@@ -149,6 +197,8 @@ module Capybara
 
         super(*args, &block)
       end
+
+      ruby2_keywords :synchronize
     end
   end
 end
