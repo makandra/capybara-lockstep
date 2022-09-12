@@ -19,7 +19,7 @@ module Capybara
           #
           # We force a non-lazy synchronization so we pick up all client-side changes
           # that have not been caused by Capybara commands.
-          Lockstep.synchronize(lazy: false)
+          Lockstep.auto_synchronize(lazy: false, log: "Synchronizing before visiting #{url}")
         end
 
         super(*args, &block).tap do
@@ -145,7 +145,7 @@ module Capybara
         # This method is called by Capybara before most interactions with
         # the browser. It is a different method than Capybara::Lockstep.synchronize!
         # We use the { lazy } option to only synchronize when we're out of sync.
-        Capybara::Lockstep.auto_synchronize(lazy: true)
+        Lockstep.auto_synchronize(lazy: true, log: 'Synchronizing before node access')
 
         super(*args, &block)
       end

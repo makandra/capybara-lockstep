@@ -28,13 +28,7 @@ module Capybara
           return
         end
 
-        # Allow passing a log message that is only logged
-        # when we're actually synchronizing.
-        if log
-          self.log(log)
-        end
-
-        synchronize_now
+        synchronize_now(log: log)
       end
 
       def auto_synchronize(**options)
@@ -45,11 +39,11 @@ module Capybara
 
       private
 
-      def synchronize_now
+      def synchronize_now(log: 'Synchronizing')
         self.synchronizing = true
         self.synchronized = false
 
-        log 'Synchronizing'
+        self.log(log)
 
         start_time = current_seconds
 
