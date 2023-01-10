@@ -345,6 +345,17 @@ Waiting additional tasks will have a negative performance impact on your test su
 > **Note:** When capybara-lockstep detects jQuery on the page, it will automatically patch [`$.ajax()`](https://api.jquery.com/jQuery.ajax/) to wait an additional task after the response was received. If your only concern is callbacks to `$.ajax()` you do not need so set `Capybara::Lockstep.wait_tasks`.
 
 
+## Running code after synchronization
+
+You can configure a proc to run after successful synchronization:
+
+```ruby
+Capybara::Lockstep.after_synchronize do
+  puts "Synchronized!"
+end
+````
+
+
 ## Contributing
 
 Pull requests are welcome on GitHub at <https://github.com/makandra/capybara-lockstep>.

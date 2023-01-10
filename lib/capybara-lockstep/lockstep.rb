@@ -53,6 +53,8 @@ module Capybara
         end
 
         synchronize_now(log: log)
+
+        run_after_synchronize_callbacks
       end
 
       # Automatic synchronization from within the capybara-lockstep should always call #auto_synchronize.
@@ -136,9 +138,10 @@ module Capybara
           end
         rescue StandardError => e
           unhandled_synchronize_error(e)
-        ensure
-          self.synchronizing = false
         end
+
+      ensure
+        self.synchronizing = false
       end
 
       def unhandled_synchronize_error(e)

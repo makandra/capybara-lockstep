@@ -112,6 +112,21 @@ describe Capybara::Lockstep do
       expect(subject).not_to be_synchronized
     end
 
+    it 'runs configured after_synchronize callbacks' do
+      stub_page
+
+      called = []
+
+      subject.after_synchronize { called << 'callback1' }
+      subject.after_synchronize { called << 'callback2' }
+
+      expect(subject).to receive(:synchronize_now)
+
+      subject.synchronize
+
+      expect(called).to eq(['callback1', 'callback2'])
+    end
+
     describe 'with { lazy: true }' do
 
       it 'synchronizes when not synchronized' do

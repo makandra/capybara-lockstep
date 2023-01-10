@@ -77,7 +77,21 @@ module Capybara
         @wait_tasks
       end
 
+      def after_synchronize(&callback)
+        after_synchronize_callbacks << callback
+      end
+
       private
+
+      def after_synchronize_callbacks
+        @before_synchronize_callbacks ||= []
+      end
+
+      def run_after_synchronize_callbacks
+        after_synchronize_callbacks.each do |callback|
+          instance_eval(&callback)
+        end
+      end
 
       def javascript_driver?
         driver.is_a?(Capybara::Selenium::Driver)
