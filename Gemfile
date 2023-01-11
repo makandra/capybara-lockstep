@@ -16,3 +16,5 @@ gem 'byebug'
 gem 'gemika'
 
 gem 'activesupport', '~> 6.0'
+
+gem 'capybara', '= 3.36.0' # last version compatible with Ruby < 2.7, which is in our test matrix
