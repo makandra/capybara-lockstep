@@ -2,6 +2,12 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+- Test against Ruby 3.2 instead of 3.0
+
+
+
 
 ## 1.2.1 - 2022-09-12
 

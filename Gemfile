@@ -13,7 +13,7 @@ gem 'thin' # ruby 3 does not include a webserver
 gem 'chrome_remote'
 
 gem 'byebug'
-gem 'gemika'
+gem 'gemika', '>= 0.8.1'
 
 gem 'activesupport', '~> 6.0'
 
