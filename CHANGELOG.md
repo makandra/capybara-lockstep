@@ -2,12 +2,22 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 1.3.1 - 2023-10-25
 
-- Test against Ruby 3.2 instead of 3.0
+Now synchronizes before and after `evaluate_script`.
+
+Previously we only synchronized around `execute_script` and `evaluate_async_script`.
 
 
+## 1.3.0 - 2023-01-10
 
+You can configure a proc to run after successful synchronization:
+
+```ruby
+Capybara::Lockstep.after_synchronize do
+  puts "Synchronized!"
+end
+````
 
 ## 1.2.1 - 2022-09-12
 
