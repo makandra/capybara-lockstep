@@ -145,9 +145,8 @@ Capybara::Session.class_eval do
   extend Capybara::Lockstep::SynchronizeAroundScriptMethod
 
   synchronize_around_script_method :execute_script
+  synchronize_around_script_method :evaluate_script
   synchronize_around_script_method :evaluate_async_script
-  # Don't synchronize around evaluate_script. It calls execute_script
-  # internally and we don't want to synchronize multiple times.
 end
 
 # Capybara 3 has driver-specific Node classes which sometimes
