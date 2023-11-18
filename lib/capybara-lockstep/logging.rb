@@ -5,7 +5,7 @@ module Capybara
         if debug? && message.present?
           message = "[capybara-lockstep] #{message}"
           if is_logger?(@debug)
-            # If someone set Capybara::Lockstep to a logger, use that
+            # If someone set Capybara::Lockstep.debug to a logger, use that
             @debug.debug(message)
           else
             # Otherwise print to STDOUT
@@ -17,7 +17,7 @@ module Capybara
       private
 
       def is_logger?(object)
-        @debug.respond_to?(:debug)
+        object.respond_to?(:debug)
       end
     end
   end

@@ -8,7 +8,7 @@ module Capybara
           define_method meth do |*args, &block|
             super(*args, &block)
           ensure
-            Lockstep.synchronized = false
+            Lockstep.unsynchronize
           end
 
           ruby2_keywords meth
@@ -88,7 +88,7 @@ module Capybara
         super(*args, &block).tap do
           if visiting_real_url
             # We haven't yet synchronized the new screen.
-            Lockstep.synchronized = false
+            Lockstep.unsynchronize_client
           end
         end
       end
@@ -128,7 +128,7 @@ module Capybara
             if !Lockstep.synchronizing?
               # We haven't yet synchronized with whatever changes the JavaScript
               # did on the frontend.
-              Lockstep.synchronized = false
+              Lockstep.unsynchronize_client
             end
           end
 
@@ -194,7 +194,16 @@ module Capybara
         # We use the { lazy } option to only synchronize when we're out of sync.
         Lockstep.auto_synchronize(lazy: true, log: 'Synchronizing before node access')
 
-        super(*args, &block)
+        block2 = lambda do
+          begin
+            block.call
+          rescue error
+            Lockstep.unsychronize_client
+            raise error
+          end
+        end
+
+        super(*args, &block2)
       end
 
       ruby2_keywords :synchronize
