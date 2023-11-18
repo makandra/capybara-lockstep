@@ -220,16 +220,7 @@ module Capybara
         # We use the { lazy } option to only synchronize when we're out of sync.
         Lockstep.auto_synchronize(lazy: true, log: 'Synchronizing before node access')
 
-        block2 = lambda do
-          begin
-            block.call
-          rescue error
-            Lockstep.unsychronize_client
-            raise error
-          end
-        end
-
-        super(*args, &block2)
+        super(*args, &block)
       end
 
       ruby2_keywords :synchronize
