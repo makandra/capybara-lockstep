@@ -167,20 +167,46 @@ end
 
 node_classes.each do |node_class|
   node_class.class_eval do
+    extend Capybara::Lockstep::SynchronizeBefore
     extend Capybara::Lockstep::UnsychronizeAfter
 
+    synchronize_before :set, lazy: true
     unsychronize_after :set
+
+    synchronize_before :select_option, lazy: true
     unsychronize_after :select_option
+
+    synchronize_before :unselect_option, lazy: true
     unsychronize_after :unselect_option
+
+    synchronize_before :click, lazy: true
     unsychronize_after :click
+
+    synchronize_before :right_click, lazy: true
     unsychronize_after :right_click
+
+    synchronize_before :double_click, lazy: true
     unsychronize_after :double_click
+
+    synchronize_before :send_keys, lazy: true
     unsychronize_after :send_keys
+
+    synchronize_before :hover, lazy: true
     unsychronize_after :hover
+
+    synchronize_before :drag_to, lazy: true
     unsychronize_after :drag_to
+
+    synchronize_before :drop, lazy: true
     unsychronize_after :drop
+
+    synchronize_before :scroll_by, lazy: true
     unsychronize_after :scroll_by
+
+    synchronize_before :scroll_to, lazy: true
     unsychronize_after :scroll_to
+
+    synchronize_before :trigger, lazy: true
     unsychronize_after :trigger
   end
 end
