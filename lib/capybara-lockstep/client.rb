@@ -14,25 +14,25 @@ module Capybara
           begin
             with_max_wait_time(timeout) do
               message_from_js = evaluate_async_script(<<~JS)
-              let done = arguments[0]
-              let synchronize = () => {
-                if (window.CapybaraLockstep) {
-                  CapybaraLockstep.synchronize(done)
-                } else {
-                  done(#{ERROR_SNIPPET_MISSING.to_json})
+                let done = arguments[0]
+                let synchronize = () => {
+                  if (window.CapybaraLockstep) {
+                    CapybaraLockstep.synchronize(done)
+                  } else {
+                    done(#{ERROR_SNIPPET_MISSING.to_json})
+                  }
                 }
-              }
-              const emptyDataURL = /^data:[^,]*,?$/
-              if (emptyDataURL.test(location.href) || location.protocol === 'about:') {
-                done(#{ERROR_PAGE_MISSING.to_json})
-              } else if (document.readyState === 'complete') {
-                // WebDriver always waits for the `load` event after a visit(),
-                // unless a different page load strategy was configured.
-                synchronize()
-              } else {
-                window.addEventListener('load', synchronize)
-              }
-            JS
+                const emptyDataURL = /^data:[^,]*,?$/
+                if (emptyDataURL.test(location.href) || location.protocol === 'about:') {
+                  done(#{ERROR_PAGE_MISSING.to_json})
+                } else if (document.readyState === 'complete') {
+                  // WebDriver always waits for the `load` event after a visit(),
+                  // unless a different page load strategy was configured.
+                  synchronize()
+                } else {
+                  window.addEventListener('load', synchronize)
+                }
+              JS
 
               case message_from_js
               when ERROR_PAGE_MISSING

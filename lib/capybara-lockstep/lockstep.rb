@@ -35,6 +35,15 @@ module Capybara
         page.instance_variable_set(:@lockstep_synchronized_client, value)
       end
 
+      # Automatic synchronization from within the capybara-lockstep should always call #auto_synchronize.
+      # This only synchronizes IFF in :auto mode, i.e. the user has not explicitly disabled automatic syncing.
+      # The :auto mode has nothing to do with the { lazy } option.
+      def auto_synchronize(**options)
+        if mode == :auto
+          synchronize(**options)
+        end
+      end
+
       def synchronize(lazy: false, log: 'Synchronizing')
         if synchronizing? || mode == :off
           return
@@ -57,6 +66,9 @@ module Capybara
         will_synchronize_client = !(lazy && synchronized_client?)
 
         begin
+          # Synchronizing the server is free, so we ignore { lazy } and do it every time.
+          Server.synchronize
+
           if will_synchronize_client
             self.log(log)
             self.synchronizing = true
@@ -72,15 +84,6 @@ module Capybara
 
         if will_synchronize_client
           run_after_synchronize_callbacks
-        end
-      end
-
-      # Automatic synchronization from within the capybara-lockstep should always call #auto_synchronize.
-      # This only synchronizes IFF in :auto mode, i.e. the user has not explicitly disabled automatic syncing.
-      # The :auto mode has nothing to do with the { lazy } option.
-      def auto_synchronize(**options)
-        if mode == :auto
-          synchronize(**options)
         end
       end
 
