@@ -3,7 +3,8 @@ require 'ruby2_keywords'
 module Capybara
   module Lockstep
     module UnsychronizeAfter
-      def unsychronize_after(meth)
+
+      def unsynchronize_after(meth)
         mod = Module.new do
           define_method meth do |*args, &block|
             super(*args, &block)
@@ -48,19 +49,19 @@ Capybara::Session.class_eval do
   synchronize_before :current_url, lazy: true # wait until running JavaScript has updated the URL
 
   synchronize_before :refresh, lazy: false # wait until running JavaScript has updated the URL
-  unsychronize_after :refresh # new document is no longer synchronized
+  unsynchronize_after :refresh # new document is no longer synchronized
 
   synchronize_before :go_back, lazy: false # wait until running JavaScript has updated the URL
-  unsychronize_after :go_back # new document is no longer synchronized
+  unsynchronize_after :go_back # new document is no longer synchronized
 
   synchronize_before :go_forward, lazy: false # wait until running JavaScript has updated the URL
-  unsychronize_after :go_forward # new document is no longer synchronized
+  unsynchronize_after :go_forward # new document is no longer synchronized
 
   synchronize_before :switch_to_frame, lazy: true # wait until the current frame is done processing
-  unsychronize_after :switch_to_frame # now that we've switched into the new frame, we don't know the document's synchronization state.
+  unsynchronize_after :switch_to_frame # now that we've switched into the new frame, we don't know the document's synchronization state.
 
   synchronize_before :switch_to_window, lazy: true # wait until the current frame is done processing
-  unsychronize_after :switch_to_window # now that we've switched to the new window, we don't know the document's synchronization state.
+  unsynchronize_after :switch_to_window # now that we've switched to the new window, we don't know the document's synchronization state.
 end
 
 module Capybara
@@ -171,43 +172,43 @@ node_classes.each do |node_class|
     extend Capybara::Lockstep::UnsychronizeAfter
 
     synchronize_before :set, lazy: true
-    unsychronize_after :set
+    unsynchronize_after :set
 
     synchronize_before :select_option, lazy: true
-    unsychronize_after :select_option
+    unsynchronize_after :select_option
 
     synchronize_before :unselect_option, lazy: true
-    unsychronize_after :unselect_option
+    unsynchronize_after :unselect_option
 
     synchronize_before :click, lazy: true
-    unsychronize_after :click
+    unsynchronize_after :click
 
     synchronize_before :right_click, lazy: true
-    unsychronize_after :right_click
+    unsynchronize_after :right_click
 
     synchronize_before :double_click, lazy: true
-    unsychronize_after :double_click
+    unsynchronize_after :double_click
 
     synchronize_before :send_keys, lazy: true
-    unsychronize_after :send_keys
+    unsynchronize_after :send_keys
 
     synchronize_before :hover, lazy: true
-    unsychronize_after :hover
+    unsynchronize_after :hover
 
     synchronize_before :drag_to, lazy: true
-    unsychronize_after :drag_to
+    unsynchronize_after :drag_to
 
     synchronize_before :drop, lazy: true
-    unsychronize_after :drop
+    unsynchronize_after :drop
 
     synchronize_before :scroll_by, lazy: true
-    unsychronize_after :scroll_by
+    unsynchronize_after :scroll_by
 
     synchronize_before :scroll_to, lazy: true
-    unsychronize_after :scroll_to
+    unsynchronize_after :scroll_to
 
     synchronize_before :trigger, lazy: true
-    unsychronize_after :trigger
+    unsynchronize_after :trigger
   end
 end
 
