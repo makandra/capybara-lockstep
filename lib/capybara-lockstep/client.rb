@@ -33,6 +33,7 @@ module Capybara
       end
 
       def synchronize
+        # If synchronization fails below we consider us unsynchronized after.
         self.synchronized = false
 
         # Running the synchronization script while an alert is open would close the alert,
