@@ -8,31 +8,8 @@ module Capybara
       attr_accessor :synchronizing
       alias synchronizing? synchronizing
 
-      def synchronized_client?
-        # The synchronized flag is per-session (page == Capybara.current_session).
-        # This enables tests that use more than one browser, e.g. to test multi-user interaction:
-        # https://makandracards.com/makandra/474480-how-to-make-a-cucumber-test-work-with-multiple-browser-sessions
-        #
-        # Ideally the synchronized flag would also be per-tab, per-frame and per-document.
-        # We haven't found a way to patch this into Capybara, as there does not seem to be
-        # a persistent object representing a document. Capybara::Node::Document just seems to
-        # be a proxy accessing whatever is the current document. The way we work around this
-        # is that we synchronize before switching tabs or frames.
-        value = page.instance_variable_get(:@lockstep_synchronized_client)
-
-        # We consider a new Capybara session to be synchronized.
-        # This will be set to false after our first visit().
-        value.nil? ? true : value
-      end
-
-      def unsynchronize_client
-        self.synchronized_client = false
-      end
-
-      alias :unsynchronize :unsynchronize_client
-
-      def synchronized_client=(value)
-        page.instance_variable_set(:@lockstep_synchronized_client, value)
+      def unsynchronize
+        client.synchronized = false
       end
 
       # Automatic synchronization from within the capybara-lockstep should always call #auto_synchronize.
@@ -63,7 +40,7 @@ module Capybara
         # thinks we're in sync or not. This always makes an execute_script() rountrip, but picks up
         # non-lazy synchronization so we pick up client-side work that have not been caused
         # by Capybara commands.
-        will_synchronize_client = !(lazy && synchronized_client?)
+        will_synchronize_client = !(lazy && client.synchronized?)
 
         begin
           # Synchronizing the server is free, so we ignore { lazy } and do it every time.
@@ -72,7 +49,6 @@ module Capybara
           if will_synchronize_client
             self.log(log)
             self.synchronizing = true
-            unsynchronize_client
             client.synchronize
             # Synchronizing the server is free, so we ignore { lazy } and do it every time.
             server.synchronize
@@ -88,18 +64,18 @@ module Capybara
 
       delegate :start_work, :end_work, to: :server
 
-      private
-
-      def page
-        Capybara.current_session
-      end
-
       def server
         @server ||= Server.new
       end
 
       def client
         @client ||= Client.new
+      end
+
+      private
+
+      def page
+        Capybara.current_session
       end
 
     end

@@ -8,7 +8,32 @@ module Capybara
       ERROR_ALERT_OPEN = 'Cannot synchronize while an alert is open'
       ERROR_NAVIGATED_AWAY = "Browser navigated away while synchronizing"
 
+      SYNCHRONIZED_IVAR = :@lockstep_synchronized_client
+
+      def synchronized?
+        # The synchronized flag is per-session (page == Capybara.current_session).
+        # This enables tests that use more than one browser, e.g. to test multi-user interaction:
+        # https://makandracards.com/makandra/474480-how-to-make-a-cucumber-test-work-with-multiple-browser-sessions
+        #
+        # Ideally the synchronized flag would also be per-tab, per-frame and per-document.
+        # We haven't found a way to patch this into Capybara, as there does not seem to be
+        # a persistent object representing a document. Capybara::Node::Document just seems to
+        # be a proxy accessing whatever is the current document. The way we work around this
+        # is that we synchronize before switching tabs or frames.
+        value = page.instance_variable_get(SYNCHRONIZED_IVAR)
+
+        # We consider a new Capybara session to be synchronized.
+        # This will be set to false after our first visit().
+        value.nil? ? true : value
+      end
+
+      def synchronized=(value)
+        page.instance_variable_set(SYNCHRONIZED_IVAR, value)
+      end
+
       def synchronize
+        self.synchronized = false
+
         start_time = current_seconds
 
         begin
@@ -44,7 +69,7 @@ module Capybara
               end_time = current_seconds
               ms_elapsed = ((end_time.to_f - start_time) * 1000).round
               log "Synchronized client successfully [#{ms_elapsed} ms]"
-              self.synchronized_client = true
+              self.synchronized = true
             end
           end
         rescue ::Selenium::WebDriver::Error::ScriptTimeoutError
