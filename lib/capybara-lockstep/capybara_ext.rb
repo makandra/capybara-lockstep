@@ -2,14 +2,13 @@ require 'ruby2_keywords'
 
 module Capybara
   module Lockstep
-    module UnsychronizeAfter
+    module SynchronizeMacros
 
-      def unsynchronize_after(meth)
+      def synchronize_before(meth, lazy:)
         mod = Module.new do
           define_method meth do |*args, &block|
+            Lockstep.auto_synchronize(lazy: lazy, log: "Synchronizing before ##{meth}")
             super(*args, &block)
-          ensure
-            Lockstep.unsynchronize
           end
 
           ruby2_keywords meth
@@ -32,18 +31,12 @@ module Capybara
         prepend(mod)
       end
 
-    end
-  end
-end
-
-module Capybara
-  module Lockstep
-    module SynchronizeBefore
-      def synchronize_before(meth, lazy:)
+      def unsynchronize_after(meth)
         mod = Module.new do
           define_method meth do |*args, &block|
-            Lockstep.auto_synchronize(lazy: lazy, log: "Synchronizing before ##{meth}")
             super(*args, &block)
+          ensure
+            Lockstep.unsynchronize
           end
 
           ruby2_keywords meth
@@ -51,13 +44,13 @@ module Capybara
 
         prepend(mod)
       end
+
     end
   end
 end
 
 Capybara::Session.class_eval do
-  extend Capybara::Lockstep::SynchronizeBefore
-  extend Capybara::Lockstep::UnsychronizeAfter
+  extend Capybara::Lockstep::SynchronizeMacros
 
   synchronize_before :html, lazy: true # wait until running JavaScript has updated the DOM
 
@@ -183,8 +176,7 @@ end
 
 node_classes.each do |node_class|
   node_class.class_eval do
-    extend Capybara::Lockstep::SynchronizeBefore
-    extend Capybara::Lockstep::UnsychronizeAfter
+    extend Capybara::Lockstep::SynchronizeMacros
 
     synchronize_before :set, lazy: true
     unsynchronize_after :set
