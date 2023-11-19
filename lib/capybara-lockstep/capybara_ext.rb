@@ -17,6 +17,21 @@ module Capybara
 
         prepend(mod)
       end
+
+      def synchronize_after(meth)
+        mod = Module.new do
+          define_method meth do |*args, &block|
+            super(*args, &block)
+          ensure
+            Lockstep.auto_synchronize
+          end
+
+          ruby2_keywords meth
+        end
+
+        prepend(mod)
+      end
+
     end
   end
 end
@@ -173,42 +188,55 @@ node_classes.each do |node_class|
 
     synchronize_before :set, lazy: true
     unsynchronize_after :set
+    synchronize_after :set
 
     synchronize_before :select_option, lazy: true
     unsynchronize_after :select_option
+    synchronize_after :select_option
 
     synchronize_before :unselect_option, lazy: true
     unsynchronize_after :unselect_option
+    synchronize_after :unselect_option
 
     synchronize_before :click, lazy: true
     unsynchronize_after :click
+    synchronize_after :click
 
     synchronize_before :right_click, lazy: true
     unsynchronize_after :right_click
+    synchronize_after :right_click
 
     synchronize_before :double_click, lazy: true
     unsynchronize_after :double_click
+    synchronize_after :double_click
 
     synchronize_before :send_keys, lazy: true
     unsynchronize_after :send_keys
+    synchronize_after :send_keys
 
     synchronize_before :hover, lazy: true
     unsynchronize_after :hover
+    synchronize_after :hover
 
     synchronize_before :drag_to, lazy: true
     unsynchronize_after :drag_to
+    synchronize_after :drag_to
 
     synchronize_before :drop, lazy: true
     unsynchronize_after :drop
+    synchronize_after :drop
 
     synchronize_before :scroll_by, lazy: true
     unsynchronize_after :scroll_by
+    synchronize_after :scroll_by
 
     synchronize_before :scroll_to, lazy: true
     unsynchronize_after :scroll_to
+    synchronize_after :scroll_to
 
     synchronize_before :trigger, lazy: true
     unsynchronize_after :trigger
+    synchronize_after :trigger
   end
 end
 
