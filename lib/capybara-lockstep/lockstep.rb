@@ -74,10 +74,9 @@ module Capybara
             self.synchronizing = true
             unsynchronize_client
             Client.synchronize
+            # Synchronizing the server is free, so we ignore { lazy } and do it every time.
+            Server.synchronize
           end
-
-          # Synchronizing the server is free, so we ignore { lazy } and do it every time.
-          Server.synchronize
         ensure
           self.synchronizing = false
         end
