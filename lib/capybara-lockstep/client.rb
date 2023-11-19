@@ -35,6 +35,15 @@ module Capybara
       def synchronize
         self.synchronized = false
 
+        # Running the synchronization script while an alert is open would close the alert,
+        # most likely causing subsequent expectations to fail.
+        if alert_present?
+          log ERROR_ALERT_OPEN
+          # Don't raise an error, this will happen in an innocent test.
+          # We will retry on the next Capybara synchronize call.
+          return
+        end
+
         start_time = Util.current_seconds
 
         begin
