@@ -131,7 +131,7 @@ describe Capybara::Lockstep do
 
       it 'synchronizes when not synchronized' do
         stub_page
-        subject.client.unsynchronize
+        subject.unsynchronize
         expect(subject).to receive(:synchronize_now)
         subject.synchronize(lazy: true)
       end

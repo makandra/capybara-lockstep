@@ -88,7 +88,7 @@ module Capybara
         super(*args, &block).tap do
           if visiting_real_url
             # We haven't yet synchronized the new screen.
-            Lockstep.client.unsynchronize
+            Lockstep.unsynchronize
           end
         end
       end
@@ -128,7 +128,7 @@ module Capybara
             if !Lockstep.synchronizing?
               # We haven't yet synchronized with whatever changes the JavaScript
               # did on the frontend.
-              Lockstep.client.unsynchronize
+              Lockstep.unsynchronize
             end
           end
 

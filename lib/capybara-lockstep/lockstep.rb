@@ -1,9 +1,9 @@
 module Capybara
   module Lockstep
-
     class << self
       include Configuration
       include Logging
+      include PageAccess
 
       attr_accessor :synchronizing
       alias synchronizing? synchronizing
@@ -62,7 +62,7 @@ module Capybara
         end
       end
 
-      delegate :start_work, :end_work, to: :server
+      delegate :start_work, :stop_work, to: :server
 
       def server
         @server ||= Server.new
@@ -72,13 +72,6 @@ module Capybara
         @client ||= Client.new
       end
 
-      private
-
-      def page
-        Capybara.current_session
-      end
-
     end
   end
 end
-

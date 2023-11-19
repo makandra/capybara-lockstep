@@ -97,13 +97,11 @@ module Capybara
         end
       end
 
-      def javascript_driver?
-        driver.is_a?(Capybara::Selenium::Driver)
-      end
-
       def send_config_to_browser(js)
+        return unless javascript_driver?
+
         begin
-          with_max_wait_time(2) do
+          Util.with_max_wait_time(2) do
             page.execute_script(<<~JS)
               if (window.CapybaraLockstep) {
                 #{js}

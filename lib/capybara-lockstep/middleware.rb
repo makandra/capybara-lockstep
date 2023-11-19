@@ -7,20 +7,14 @@ module Capybara
       end
 
       def call(env)
-        start_work
-        status, headers, body = @app.call(env)
-        body_proxy = Rack::BodyProxy.new(body, &method(:stop_work))
-        [status, headers, body_proxy]
-      end
+        tag = "Server request for #{env['PATH_INFO'] || 'unknown path'}"
+        Lockstep.start_work(tag)
 
-      private
-
-      def start_work
-        Lockstep.start_work('Server request')
-      end
-
-      def stop_work
-        Lockstep.stop_work('Server request')
+        begin
+          @app.call(env)
+        ensure
+          Lockstep.stop_work(tag)
+        end
       end
 
     end

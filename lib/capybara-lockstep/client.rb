@@ -2,6 +2,7 @@ module Capybara
   module Lockstep
     class Client
       include Logging
+      include PageAccess
 
       ERROR_SNIPPET_MISSING = 'Cannot synchronize: capybara-lockstep JavaScript snippet is missing'
       ERROR_PAGE_MISSING = 'Cannot synchronize with empty page'
@@ -34,10 +35,10 @@ module Capybara
       def synchronize
         self.synchronized = false
 
-        start_time = current_seconds
+        start_time = Util.current_seconds
 
         begin
-          with_max_wait_time(timeout) do
+          Util.with_max_wait_time(timeout) do
             message_from_js = evaluate_async_script(<<~JS)
               let done = arguments[0]
               let synchronize = () => {
@@ -66,7 +67,7 @@ module Capybara
               log(message_from_js)
             else
               log message_from_js
-              end_time = current_seconds
+              end_time = Util.current_seconds
               ms_elapsed = ((end_time.to_f - start_time) * 1000).round
               log "Synchronized client successfully [#{ms_elapsed} ms]"
               self.synchronized = true
@@ -103,35 +104,17 @@ module Capybara
 
       private
 
-      def page
-        Capybara.current_session
-      end
-
       def unhandled_synchronize_error(e)
         Lockstep.log "#{e.class.name} while synchronizing: #{e.message}"
         raise e
       end
 
-      delegate :evaluate_script, :evaluate_async_script, :execute_script, :driver, to: :page
-
-      def with_max_wait_time(seconds, &block)
-        old_max_wait_time = Capybara.default_max_wait_time
-        Capybara.default_max_wait_time = seconds
-        begin
-          block.call
-        ensure
-          Capybara.default_max_wait_time = old_max_wait_time
-        end
+      def timeout
+        Lockstep.timeout
       end
 
-      def ignoring_alerts(&block)
-        block.call
-      rescue ::Selenium::WebDriver::Error::UnexpectedAlertOpenError
-        # no-op
-      end
-
-      def current_seconds
-        Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      def timeout_with
+        Lockstep.timeout_with
       end
 
     end

@@ -11,9 +11,9 @@ module Capybara
 
       def start_work(tag)
         tagger_mutex.synchronize do
-          if job_count == 0
-            mutex.lock
-          end
+          # if job_count == 0
+          #   synchronizer_mutex.lock
+          # end
 
           self.job_count += 1
           log("Started server work: #{tag} [#{job_count} server jobs]")
@@ -25,9 +25,9 @@ module Capybara
           self.job_count -= 1
           log("Stopped server work: #{tag} [#{job_count} server jobs]")
 
-          if job_count == 0
-            mutex.unlock
-          end
+          # if job_count == 0
+          #   synchronizer_mutex.unlock
+          # end
         end
       end
 
@@ -38,7 +38,7 @@ module Capybara
       private
 
       def synchronizer_mutex
-        @synchronize_mutex ||= Mutex.new
+        @synchronizer_mutex ||= Mutex.new
       end
 
       def tagger_mutex
