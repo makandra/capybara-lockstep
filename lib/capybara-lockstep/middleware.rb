@@ -10,7 +10,7 @@ module Capybara
         start_work
         status, headers, body = @app.call(env)
         body_proxy = Rack::BodyProxy.new(body, &method(:stop_work))
-        [status, headers, body]
+        [status, headers, body_proxy]
       end
 
       private
