@@ -2,6 +2,7 @@ module Capybara
   module Lockstep
     class Server
       class << self
+        include Logging
 
         def job_count
           @job_count ||= 0
@@ -16,14 +17,14 @@ module Capybara
             end
 
             self.job_count += 1
-            Lockstep.log("Started server work: #{tag} [#{job_count} server jobs]")
+            log("Started server work: #{tag} [#{job_count} server jobs]")
           end
         end
 
         def stop_work(tag)
           tagger_mutex.synchronize do
             self.job_count -= 1
-            Lockstep.log("Stopped server work: #{tag} [#{job_count} server jobs]")
+            log("Stopped server work: #{tag} [#{job_count} server jobs]")
 
             if job_count == 0
               mutex.unlock

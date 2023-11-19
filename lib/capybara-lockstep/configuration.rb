@@ -18,9 +18,13 @@ module Capybara
         @timeout_with = action&.to_sym
       end
 
+      def debug
+        @debug.nil? ? false : @debug
+      end
+
       def debug?
         # @debug may also be a Logger object, so convert it to a boolean
-        @debug.nil? ? false : !!@debug
+        !!debug
       end
 
       def debug=(value)

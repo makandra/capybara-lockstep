@@ -2,11 +2,11 @@ module Capybara
   module Lockstep
     module Logging
       def log(message)
-        if debug? && message.present?
+        if Lockstep.debug? && message.present?
           message = "[capybara-lockstep] #{message}"
-          if is_logger?(@debug)
+          if is_logger?(Lockstep.debug)
             # If someone set Capybara::Lockstep.debug to a logger, use that
-            @debug.debug(message)
+            Lockstep.debug(message)
           else
             # Otherwise print to STDOUT
             puts message

@@ -7,6 +7,7 @@ module Capybara
       ERROR_NAVIGATED_AWAY = "Browser navigated away while synchronizing"
 
       class << self
+        include Logging
 
         def synchronize
           start_time = current_seconds
@@ -77,10 +78,6 @@ module Capybara
         end
 
         private
-
-        def log(*args)
-          Lockstep.log(*args)
-        end
 
         def page
           Capybara.current_session
