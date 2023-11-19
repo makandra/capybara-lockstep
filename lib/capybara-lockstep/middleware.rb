@@ -16,11 +16,11 @@ module Capybara
       private
 
       def start_work
-        Server.start_work('Server request')
+        Lockstep.start_work('Server request')
       end
 
       def stop_work
-        Server.stop_work('Server request')
+        Lockstep.stop_work('Server request')
       end
 
     end

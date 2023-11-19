@@ -67,15 +67,15 @@ module Capybara
 
         begin
           # Synchronizing the server is free, so we ignore { lazy } and do it every time.
-          Server.synchronize
+          server.synchronize
 
           if will_synchronize_client
             self.log(log)
             self.synchronizing = true
             unsynchronize_client
-            Client.synchronize
+            client.synchronize
             # Synchronizing the server is free, so we ignore { lazy } and do it every time.
-            Server.synchronize
+            server.synchronize
           end
         ensure
           self.synchronizing = false
@@ -86,10 +86,20 @@ module Capybara
         end
       end
 
+      delegate :start_work, :end_work, to: :server
+
       private
 
       def page
         Capybara.current_session
+      end
+
+      def server
+        @server ||= Server.new
+      end
+
+      def client
+        @client ||= Client.new
       end
 
     end
