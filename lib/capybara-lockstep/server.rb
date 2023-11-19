@@ -3,47 +3,44 @@ module Capybara
     class Server
       include Logging
 
-      def job_count
-        @job_count ||= 0
+      def initialize
+        @job_count = 0
+        @job_count_mutex = Mutex.new
+        @idle_condition = ConditionVariable.new
       end
 
-      attr_writer :job_count
+      attr_accessor :job_count
 
       def start_work(tag)
-        tagger_mutex.synchronize do
-          # if job_count == 0
-          #   synchronizer_mutex.lock
-          # end
-
+        job_count_mutex.synchronize do
           self.job_count += 1
-          log("Started server work: #{tag} [#{job_count} server jobs]")
+          log("Started server work: #{tag} [#{job_count} server jobs]") if tag
         end
       end
 
       def stop_work(tag)
-        tagger_mutex.synchronize do
+        job_count_mutex.synchronize do
           self.job_count -= 1
-          log("Stopped server work: #{tag} [#{job_count} server jobs]")
+          log("Stopped server work: #{tag} [#{job_count} server jobs]") if tag
 
-          # if job_count == 0
-          #   synchronizer_mutex.unlock
-          # end
+          if job_count == 0
+            idle_condition.broadcast
+          end
         end
       end
 
       def synchronize
-        synchronizer_mutex.synchronize { }
+        job_count_mutex.synchronize do
+          if job_count > 0
+            idle_condition.wait(job_count_mutex)
+          end
+        end
       end
 
       private
 
-      def synchronizer_mutex
-        @synchronizer_mutex ||= Mutex.new
-      end
+      attr_reader :job_count_mutex, :idle_condition
 
-      def tagger_mutex
-        @tagger_mutex ||= Mutex.new
-      end
     end
   end
 end
