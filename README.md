@@ -3,7 +3,7 @@
 This Ruby gem synchronizes [Capybara](https://github.com/teamcapybara/capybara) commands with client-side JavaScript and AJAX requests. This greatly improves the stability of an end-to-end ("E2E") test suite, even if that suite has timing issues.
 
 The next section explain why your test suite is flaky and how capybara-lockstep can help.\
-If you don't care you may skip to [installation instructions](#installation).
+If you don't care you may **skip to [installation instructions](#installation)**.
 
 
 Why are tests flaky?
@@ -58,8 +58,9 @@ How capybara-lockstep helps
 
 capybara-lockstep waits until the browser is idle before moving on to the next Capybara command. This greatly relieves the pressure on [Capybara's retry logic](https://github.com/teamcapybara/capybara#asynchronous-javascript-ajax-and-friends).
 
-capybara-lockstep synchronizes before:
+capybara-lockstep synchronizes when one of the following occurs:
 
+- Capybara looks up an element
 - Capybara simulates a user interaction (clicking, typing, etc.)
 - Capybara visits a new URL
 - Capybara executes JavaScript
@@ -69,13 +70,24 @@ When capybara-lockstep synchronizes it will:
 - wait for all document resources to load (images, CSS, fonts, frames).
 - wait for client-side JavaScript to render or hydrate DOM elements.
 - wait for any pending AJAX requests to finish and their callbacks to be called.
-- capybara-lockstep waits for dynamically inserted `<script>`s to load (e.g. from [dynamic imports](https://webpack.js.org/guides/code-splitting/#dynamic-imports) or Analytics snippets).
-- capybara-lockstep waits for dynamically inserted `<img>` or `<iframe>` elements to load.
+- wait for dynamically inserted `<script>`s to load (e.g. from [dynamic imports](https://webpack.js.org/guides/code-splitting/#dynamic-imports) or Analytics snippets).
+- waits for dynamically inserted `<img>` or `<iframe>` elements to load.
 
-In summary Capybara can no longer observe the page while HTTP requests are in flight.
+In summary Capybara can no longer observe or interact with the page while HTTP requests are in flight.
 This covers most async work that causes flaky tests.
 
-You can also configure capybara-lockstep to [wait for other async work](#signaling-asynchronous-work) that does not involve the network, like animations.
+
+### Limitations
+
+Async work not synchronized by capybara-lockstep includes:
+
+- Animations
+- Websocket connections
+- Media elements (`<video>`, `<audio>`)
+- Service workers
+- Work scheduled via `setTimeout()` or `setInterval()`.
+
+You can configure capybara-lockstep to [wait for additional async work](#signaling-asynchronous-work).
 
 
 Installation
@@ -85,8 +97,8 @@ Installation
 
 Check if your application satisfies all requirements for capybara-lockstep:
 
-- Capybara 2 or higher.
-- Your Capybara driver must use [selenium-webdriver](https://rubygems.org/gems/selenium-webdriver/). capybara-lockstep deactivates itself for any other driver.
+- Capybara 2.0 or higher.
+- Your Capybara driver must use [selenium-webdriver](https://rubygems.org/gems/selenium-webdriver/) 3.0 or higher. capybara-lockstep deactivates itself for any other driver.
 - This gem was only tested with a Selenium-controlled Chrome browser. [Chrome in headless mode](https://makandracards.com/makandra/492109-running-capybara-tests-in-headless-chrome) is recommended, but not required.
 - This gem was only tested with Rails, but there's no Rails dependency.
 
@@ -110,7 +122,7 @@ $ bundle install
 If you're not using Rails you should also `require 'capybara-lockstep'` in your `spec_helper.rb` (RSpec), `test_helper.rb` (Minitest) or `env.rb` (Cucumber).
 
 
-### Including the JavaScript snippet
+### Including the JavaScript snippet (required)
 
 capybara-lockstep requires a JavaScript snippet to be embedded by the application under test. If that snippet is missing on a screen, capybara-lockstep will not be able to synchronize with the browser. In that case the test will continue without synchronization.
 
@@ -125,6 +137,26 @@ Ideally the snippet should be included in the `<head>` before any other `<script
 **If you're not using Rails** you can `include Capybara::Lockstep::Helper` and access the JavaScript with `capybara_lockstep_script`.
 
 **If you have a strict [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)** the `capybara_lockstep` Rails helper will insert a CSP nonce by default. You can also pass an explicit nonce string using the `:nonce` option.
+
+
+### Including the middleware (optional)
+
+This gem provides a Rack middleware to block Capybara while your Rails (or Rack) backend is busy.
+
+Using the middleware is optional, as the [JavaScript snippet](#including-the-javascript-snippet-required) already for AJAX requests on the client. However, using the middleware covers some additional edge cases. For example, the middleware detects requests that were aborted on the frontend, but are still being processed by the backend.
+
+To include the middleware in a Rails application, add the following line to `config/environments/test.rb`:
+
+```ruby
+config.middleware.insert_before 0, Capybara::Lockstep::Middleware
+```
+
+In a **non-Rails** application you should include the middleware as high up in your middleware stack as possible:
+
+```ruby
+use Capybara::Lockstep::Middleware
+# Other middleware here
+```
 
 
 
@@ -152,16 +184,22 @@ Note that you may see some failures from tests with wrong assertions, which prev
 
 ## Signaling asynchronous work
 
-By default capybara-lockstep waits until resources have loaded, AJAX requests have finished and their callbacks have been called.
+[By default](#how-capybara-lockstep-helps) capybara-lockstep waits until resources have loaded, AJAX requests have finished and their callbacks have been called.
+There are also some [limitations](#limitations).
 
-You can configure capybara-lockstep to wait for other async work that does not involve the network. Let's say we have an animation that fades in a new element over 2 seconds. The following will prevent Capybara from observing the page while the animation is running:
+You can configure capybara-lockstep to wait for other async work.
+
+
+### On the frontend
+
+Let's say we have an animation that fades in a new element over 2 seconds. The following will block Capybara while the animation is running:
 
 ```js
 async function fadeIn(element) {
-  CapybaraLockstep.startWork('Animation')
+  CapybaraLockstep?.startWork('Animation')
   startAnimation(element, 'fade-in')
   await waitForAnimationEnd(element)
-  CapybaraLockstep.stopWork('Animation')
+  CapybaraLockstep?.stopWork('Animation')
 }
 ```
 
@@ -175,20 +213,24 @@ The string argument is used for logging (when logging is enabled). It does **not
 You may omit the string argument, in which case nothing will be logged, but the work will still be tracked.
 
 
-## Note on interacting with the JavaScript API
+### On the backend
 
-If you only load capybara-lockstep in tests you, should check for the `CapybaraLockstep` global to be defined before you interact with the JavaScript API.
+You don't need to signal work within the regular request/response cycle, as this is detected automatically. You can however signal
+work that happens outside a request, e.g. in a background job or WebSocket handler.
 
-```js
-if (window.CapybaraLockstep) {
-  // interact with CapybaraLockstep
-}
-```
+The following will block Capybara while a [Sidekiq](https://sidekiq.org/) job is running:
 
-If you can use ES6 you may also use [optional chaining](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining) to only call a function if `window.CapybaraLockstep` is defined:
+```ruby
+class HardJob
+  include Sidekiq::Job
 
-```js
-window.CapybaraLockstep?.startWork('Work')
+  def perform(name, count)
+    Capybara::Lockstep.start_work('HardJob') if defined?(Capybara::Lockstep)
+    # do something
+  ensure
+    Capybara::Lockstep.stop_work('StopWork') if defined?(Capybara::Lockstep)
+  end
+end
 ```
 
 
@@ -335,14 +377,13 @@ It is theoretically possible that your test will observe the browser in that win
 Any issues caused by this will usually be mitigated by Capybara's retry logic. **If** you think that this is an issue for your test suite, you can configure capybara-headless to wait additional tasks before it considers the browser to be idle:
 
 ```ruby
-Capybara::Lockstep.wait_tasks = 1
+Capybara::Lockstep.wait_tasks = 2 // default is 1
 ```
 
 If you see longer chains of `then()` or nested `setTimeout()` calls in your code, you may need to configure a higher number of tasks to wait.
 
 Waiting additional tasks will have a negative performance impact on your test suite.
 
-> **Note:** When capybara-lockstep detects jQuery on the page, it will automatically patch [`$.ajax()`](https://api.jquery.com/jQuery.ajax/) to wait an additional task after the response was received. If your only concern is callbacks to `$.ajax()` you do not need so set `Capybara::Lockstep.wait_tasks`.
 
 
 ## Running code after synchronization
