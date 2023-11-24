@@ -9,6 +9,7 @@ gem 'activesupport', '~> 6.0'
 gem "rake", "~> 13.0"
 
 gem "rspec", "~> 3.0"
+gem "rspec-wait"
 gem 'sinatra'
 gem 'thin' # ruby 3 does not include a webserver
 gem 'puma'

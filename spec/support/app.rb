@@ -1,53 +1,31 @@
 require 'sinatra'
 require 'active_support/core_ext/class/attribute'
 
-class InspectableLock
-
-  def initialize
-    reset
-  end
-
-  def lock
-    @queue.pop
-  end
-
-  def unlock
-    @queue.push(:value)
-  end
-
-  delegate :num_waiting, to: :@queue
-
-  def waiting?
-    num_waiting > 0
-  end
-
-  def reset
-    @queue = Queue.new
-  end
-
-end
-
-
 class App < Sinatra::Base
+  include Capybara::Lockstep::Helper
 
   class_attribute :start_html, :start_script, :lock
   delegate :start_html, :start_script, :lock, :reset, to: :class
 
   get '/start' do
+    Kernel.puts '[app] /start'
     render_body(<<~HTML)
       #{start_html}
       <script>#{start_script}</script>
     HTML
   end
 
-  get '/locked' do
-    lock.lock
+  get '/lock' do
+    Kernel.puts '[app] /lock start'
+    lock.wait
+    Kernel.puts '[app] /lock end'
+    'ok'
   end
 
   def self.reset
     self.start_html = 'hi world'
     self.start_script = 'console.log("loaded")'
-    self.lock = InspectableLock.new
+    self.lock = ObservableLock.new
   end
 
   private
@@ -55,6 +33,9 @@ class App < Sinatra::Base
   def render_body(content)
     <<~HTML
       <html>
+        <head>
+          <script>#{capybara_lockstep_js}</script>
+        </head>
         <body>
           #{content}
         </body>
