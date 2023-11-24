@@ -4,28 +4,24 @@ require 'active_support/core_ext/class/attribute'
 class App < Sinatra::Base
   include Capybara::Lockstep::Helper
 
-  class_attribute :start_html, :start_script, :lock
-  delegate :start_html, :start_script, :lock, :reset, to: :class
+  class_attribute :start_html, :start_script, :next_action
+  delegate :start_html, :start_script, :next_action, :reset, to: :class
 
   get '/start' do
-    Kernel.puts '[app] /start'
     render_body(<<~HTML)
       #{start_html}
       <script>#{start_script}</script>
     HTML
   end
 
-  get '/lock' do
-    Kernel.puts '[app] /lock start'
-    lock.wait
-    Kernel.puts '[app] /lock end'
-    'ok'
+  get '/next' do
+    next_action.call
   end
 
   def self.reset
     self.start_html = 'hi world'
     self.start_script = 'console.log("loaded")'
-    self.lock = ObservableLock.new
+    self.next_action = -> { 'hello from /next' }
   end
 
   private

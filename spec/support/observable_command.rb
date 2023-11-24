@@ -3,27 +3,37 @@ class ObservableCommand
   def initialize(&block)
     @state = :initialized
     @block = block
+    @error = nil
   end
 
-  attr_reader :state
+  attr_reader :state, :error
 
   # Don't name it #call or expect() and wait() will automatically call it
   def execute
     @state = :running
-    $stdout.puts "[ObservableCommand] State is now #{state.inspect}"
     Thread.new do
       @block.call
       @state = :finished
-      $stdout.puts "[ObservableCommand] State is now #{state.inspect}"
-    rescue Exception
+    rescue Exception => error
+      @error = error
       @state = :failed
-      $stdout.puts "[ObservableCommand] State is now #{state.inspect}"
     end
   end
 
-  def has_state?(state)
-    $stdout.puts "has_state?(#{state.inspect}) => #{(self.state == state).inspect} because @state is #{self.state.inspect}"
-    self.state == state
+  def initialized?
+    state == :initialized
+  end
+
+  def running?
+    state == :running
+  end
+
+  def finished?
+    state == :finished
+  end
+
+  def failed?
+    state == :failed?
   end
 
 end

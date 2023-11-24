@@ -1,10 +1,10 @@
-class ObservableLock
+class Wall
 
   def initialize
     reset
   end
 
-  def wait
+  def block
     @queue.pop
   end
 
@@ -14,7 +14,7 @@ class ObservableLock
 
   delegate :num_waiting, to: :@queue
 
-  def waiting?
+  def blocking?
     num_waiting > 0
   end
 

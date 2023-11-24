@@ -7,7 +7,7 @@ require 'active_support/dependencies/autoload'
 require 'active_support/core_ext/numeric'
 
 # Load all files in spec/support
-Dir["#{__dir__}/support/**", '*.rb'].each { |f| require f }
+Dir["#{__dir__}/support/**/*.rb"].each { |f| require f }
 
 
 
