@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-# 2.0.0-rc1
+# 2.0.0
 
 This major release detects many additional sources of flaky tests: 
  
@@ -11,8 +11,8 @@ This major release detects many additional sources of flaky tests:
 - We now synchronize after a user interaction (e.g. after a click). Previously we only synchronized before an observation. This could lead to race conditions when a test made assertions without going through Capybara, e.g. by accessing the database or global state variables.
 - When a job ends (e.g. an AJAX request finishes) we now wait for one [JavaScript task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/). This gives event listeners more time to schedule new async work.
 - We now wait one JavaScript task after `touchstart`, `mousedown`, `click` and `keydown` events. This gives event listeners more time to schedule async work after a user interaction.
-- You can now wait while the backend server is busy, by using `Capybara::Lockstep::Middleware` in your Rails or Rack app. We previously only waited for AJAX requests on the client, but using the middleware addresses some additional edge cases. For example, the middleware detects requests that were aborted on the frontend, but are still being processed by the backend.
-- You can signal async work from the backend, e.g. for background jobs. Note that you don't need to signal work for the regular request/response cycle, as this is detected automatically.
+- You can now [wait while the backend server is busy](https://github.com/makandra/capybara-lockstep/#including-the-middleware-optional), by using `Capybara::Lockstep::Middleware` in your Rails or Rack app. We previously only waited for AJAX requests on the client, but using the middleware addresses some additional edge cases. For example, the middleware detects requests that were aborted on the frontend, but are still being processed by the backend.
+- You can [signal async work from the backend](https://github.com/makandra/capybara-lockstep/#on-the-backend), e.g. for background jobs. Note that you don't need to signal work for the regular request/response cycle, as this is detected automatically.
 
 Although we now cover a lot more edge cases, this releases will not slow down your test suite considerably.
 
