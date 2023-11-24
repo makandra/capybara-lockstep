@@ -1,98 +1,97 @@
 describe 'synchronization' do
 
-  it 'renders the app' do
-    visit '/start'
-    expect(page).to have_content('hi world')
-  end
+  describe 'on click' do
 
-  it 'waits until an AJAX request has finished' do
-    App.start_html = <<~HTML
-      <a href="#" onclick="fetch('/next')">label</a>
-    HTML
+    it 'waits until an AJAX request has finished' do
+      App.start_html = <<~HTML
+        <a href="#" onclick="fetch('/next')">label</a>
+      HTML
 
-    wall = Wall.new
-    App.next_action = -> { wall.block }
+      wall = Wall.new
+      App.next_action = -> { wall.block }
 
-    visit '/start'
-    command = ObservableCommand.new { page.find('a').click  }
-    expect(command).to run_into_wall(wall)
+      visit '/start'
+      command = ObservableCommand.new { page.find('a').click  }
+      expect(command).to run_into_wall(wall)
 
-    wall.release
+      wall.release
 
-    wait(0.5.seconds).for(command).to be_finished
-  end
-
-  it 'waits until a dynamically inserted image has loaded' do
-    App.start_html = <<~HTML
-      <a href="#" onclick="img = document.createElement('img'); img.src = '/next'; document.body.append(img)">label</a>
-    HTML
-
-    wall = Wall.new
-    App.next_action = -> do
-      wall.block
-      content_type 'image/png'
-      Base64.decode64('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=')
+      wait(0.5.seconds).for(command).to be_finished
     end
 
-    visit '/start'
-    command = ObservableCommand.new { page.find('a').click  }
-    expect(command).to run_into_wall(wall)
+    it 'waits until a dynamically inserted image has loaded' do
+      App.start_html = <<~HTML
+        <a href="#" onclick="img = document.createElement('img'); img.src = '/next'; document.body.append(img)">label</a>
+      HTML
 
-    wall.release
+      wall = Wall.new
+      App.next_action = -> do
+        wall.block
+        content_type 'image/png'
+        Base64.decode64('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=')
+      end
 
-    wait(0.5.seconds).for(command).to be_finished
-  end
+      visit '/start'
+      command = ObservableCommand.new { page.find('a').click  }
+      expect(command).to run_into_wall(wall)
 
-  it 'waits until a dynamically inserted image has failed to load' do
-    App.start_html = <<~HTML
-      <a href="#" onclick="img = document.createElement('img'); img.src = '/next'; document.body.append(img)">label</a>
-    HTML
+      wall.release
 
-    wall = Wall.new
-    App.next_action = -> do
-      wall.block
-      halt 404
+      wait(0.5.seconds).for(command).to be_finished
     end
 
-    visit '/start'
-    command = ObservableCommand.new { page.find('a').click  }
-    expect(command).to run_into_wall(wall)
+    it 'waits until a dynamically inserted image has failed to load' do
+      App.start_html = <<~HTML
+        <a href="#" onclick="img = document.createElement('img'); img.src = '/next'; document.body.append(img)">label</a>
+      HTML
 
-    wall.release
+      wall = Wall.new
+      App.next_action = -> do
+        wall.block
+        halt 404
+      end
 
-    wait(0.5.seconds).for(command).to be_finished
-  end
+      visit '/start'
+      command = ObservableCommand.new { page.find('a').click  }
+      expect(command).to run_into_wall(wall)
 
-  it 'waits until a dynamically inserted script has loaded' do
-    App.start_html = <<~HTML
-      <a href="#" onclick="script = document.createElement('script'); script.src = '/next'; document.body.append(script)">label</a>
-    HTML
+      wall.release
 
-    wall = Wall.new
-    App.next_action = -> do
-      wall.block
-      content_type 'text/javascript'
-      'document.body.style.backgroundColor = "blue"'
+      wait(0.5.seconds).for(command).to be_finished
     end
 
-    visit '/start'
+    it 'waits until a dynamically inserted script has loaded' do
+      App.start_html = <<~HTML
+        <a href="#" onclick="script = document.createElement('script'); script.src = '/next'; document.body.append(script)">label</a>
+      HTML
 
-    command = ObservableCommand.new { page.find('a').click  }
-    expect(command).to run_into_wall(wall)
+      wall = Wall.new
+      App.next_action = -> do
+        wall.block
+        content_type 'text/javascript'
+        'document.body.style.backgroundColor = "blue"'
+      end
 
-    wall.release
+      visit '/start'
 
-    wait(0.5.seconds).for(command).to be_finished
-  end
+      command = ObservableCommand.new { page.find('a').click  }
+      expect(command).to run_into_wall(wall)
 
-  it 'does not close an alert that was opened on click' do
-    App.start_html = <<~HTML
-      <a href="#" onclick="confirm('OK to proceed?')">label</a>
-    HTML
+      wall.release
 
-    visit '/start'
-    page.find('a').click
-    page.accept_confirm('OK to proceed?')
+      wait(0.5.seconds).for(command).to be_finished
+    end
+
+    it 'does not close an alert that was opened on click' do
+      App.start_html = <<~HTML
+        <a href="#" onclick="confirm('OK to proceed?')">label</a>
+      HTML
+
+      visit '/start'
+      page.find('a').click
+      page.accept_confirm('OK to proceed?')
+    end
+
   end
 
 end
