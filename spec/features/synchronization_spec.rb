@@ -84,4 +84,15 @@ describe 'synchronization' do
 
     wait(0.5.seconds).for(command).to be_finished
   end
+
+  it 'does not close an alert that was opened on click' do
+    App.start_html = <<~HTML
+      <a href="#" onclick="confirm('OK to proceed?')">label</a>
+    HTML
+
+    visit '/start'
+    page.find('a').click
+    page.accept_confirm('OK to proceed?')
+  end
+
 end
