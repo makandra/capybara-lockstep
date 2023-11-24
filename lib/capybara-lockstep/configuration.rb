@@ -53,6 +53,14 @@ module Capybara
         @mode = mode&.to_sym
       end
 
+      def with_mode(temporary_mode, &block)
+        old_mode = mode
+        self.mode = temporary_mode
+        block.call
+      ensure
+        self.mode = temporary_mode
+      end
+
       def enabled=(enabled)
         case enabled
         when true

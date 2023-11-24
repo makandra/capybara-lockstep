@@ -94,4 +94,54 @@ describe 'synchronization' do
 
   end
 
+  describe 'when reading elements' do
+
+    it "synchronizes before accessing an element, without relying on Capybara's reload mechanic" do
+      App.start_html = <<~HTML
+        <div id="content">old content</div>
+      HTML
+
+      App.start_script = <<~JS
+        CapybaraLockstep.startWork('spec')
+        setTimeout(() => {
+          CapybaraLockstep.stopWork('spec')
+          document.querySelector('#content').textContent = 'new content'
+        }, 500)
+      JS
+
+      visit '/start'
+
+      page.using_wait_time(0) do
+        expect(page).to have_css('#content', text: 'new content')
+      end
+    end
+
+  end
+
+  describe 'script execution' do
+
+    it 'synchronizes before evaluate_script' do
+      App.start_html = <<~HTML
+        <div id="content">old content</div>
+      HTML
+
+      App.start_script = <<~JS
+        CapybaraLockstep.startWork('spec')
+        window.myProp = 'value before work'
+
+        setTimeout(() => {
+          CapybaraLockstep.stopWork('spec')
+          window.myProp = 'value after work'
+        }, 500)
+      JS
+
+      visit '/start'
+
+      page.using_wait_time(0) do
+        expect(page.evaluate_script('myProp')).to eq('value after work')
+      end
+    end
+
+  end
+
 end

@@ -38,5 +38,10 @@ Capybara.configure do |config|
   config.default_max_wait_time = 1
 end
 
-Capybara::Lockstep.timeout = 5
-Capybara::Lockstep.debug = false
+RSpec.configure do |config|
+  config.before(:each) do
+    Capybara::Lockstep.timeout = 5
+    Capybara::Lockstep.debug = false
+    Capybara::Lockstep.mode = :auto
+  end
+end
