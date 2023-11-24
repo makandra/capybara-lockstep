@@ -15,7 +15,7 @@ class App < Sinatra::Base
   end
 
   get '/next' do
-    next_action.call
+    instance_exec(&next_action)
   end
 
   def self.reset

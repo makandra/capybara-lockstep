@@ -5,6 +5,7 @@ require 'capybara/rspec'
 require "rspec/wait"
 require 'active_support/dependencies/autoload'
 require 'active_support/core_ext/numeric'
+require 'base64'
 
 # Load all files in spec/support
 Dir["#{__dir__}/support/**/*.rb"].each { |f| require f }
@@ -38,4 +39,4 @@ Capybara.configure do |config|
 end
 
 Capybara::Lockstep.timeout = 5
-Capybara::Lockstep.debug = true
+Capybara::Lockstep.debug = false
