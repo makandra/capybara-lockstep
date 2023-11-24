@@ -134,7 +134,7 @@ capybara-lockstep requires a JavaScript snippet to be embedded by the applicatio
 
 Ideally the snippet should be included in the `<head>` before any other `<script>` tags.
 
-**If you're not using Rails** you can `include Capybara::Lockstep::Helper` and access the JavaScript with `capybara_lockstep_script`.
+**If you're not using Rails** you can `include Capybara::Lockstep::Helper` and access the JavaScript code with `capybara_lockstep_js`.
 
 **If you have a strict [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)** the `capybara_lockstep` Rails helper will insert a CSP nonce by default. You can also pass an explicit nonce string using the `:nonce` option.
 
