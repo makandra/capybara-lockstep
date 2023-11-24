@@ -2,10 +2,10 @@ PATH
   remote: .
   specs:
     capybara-lockstep (2.0.0.rc1)
-      activesupport (>= 3.2)
-      capybara (>= 2.0)
+      activesupport (>= 4.2)
+      capybara (>= 3.0)
       ruby2_keywords
-      selenium-webdriver (>= 3)
+      selenium-webdriver (>= 4.0)
 
 GEM
   remote: https://rubygems.org/
@@ -16,10 +16,10 @@ GEM
       minitest (>= 5.1)
       tzinfo (~> 2.0)
       zeitwerk (~> 2.3)
-    addressable (2.8.1)
+    addressable (2.8.5)
       public_suffix (>= 2.0.2, < 6.0)
     byebug (11.1.3)
-    capybara (3.36.0)
+    capybara (3.39.2)
       addressable
       matrix
       mini_mime (>= 0.1.3)
@@ -29,36 +29,34 @@ GEM
       regexp_parser (>= 1.5, < 3.0)
       xpath (~> 3.2)
     childprocess (4.1.0)
-    chrome_remote (0.3.0)
-      websocket-driver (~> 0.6)
     concurrent-ruby (1.1.10)
-    daemons (1.3.1)
+    daemons (1.4.1)
     diff-lcs (1.3)
     eventmachine (1.2.7)
     gemika (0.8.1)
     i18n (1.12.0)
       concurrent-ruby (~> 1.0)
-    jasmine (3.6.0)
-      jasmine-core (~> 3.6.0)
-      phantomjs
-      rack (>= 1.2.1)
-      rake
-    jasmine-core (3.6.0)
     matrix (0.4.2)
-    mini_mime (1.1.2)
-    mini_portile2 (2.8.1)
+    mini_mime (1.1.5)
+    mini_portile2 (2.8.5)
     minitest (5.16.3)
-    nokogiri (1.13.8)
-      mini_portile2 (~> 2.8.0)
+    mustermann (3.0.0)
+      ruby2_keywords (~> 0.0.1)
+    nio4r (2.6.1)
+    nokogiri (1.15.5)
+      mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
-    phantomjs (2.1.1.0)
-    public_suffix (5.0.0)
-    racc (1.6.0)
-    rack (2.2.3)
-    rack-test (2.0.2)
+    public_suffix (5.0.4)
+    puma (6.4.0)
+      nio4r (~> 2.0)
+    racc (1.7.3)
+    rack (2.2.8)
+    rack-protection (3.1.0)
+      rack (~> 2.2, >= 2.2.4)
+    rack-test (2.1.0)
       rack (>= 1.3)
-    rake (13.0.1)
-    regexp_parser (2.5.0)
+    rake (13.1.0)
+    regexp_parser (2.8.2)
     rexml (3.2.5)
     rspec (3.7.0)
       rspec-core (~> 3.7.0)
@@ -79,15 +77,18 @@ GEM
       childprocess (>= 0.5, < 5.0)
       rexml (~> 3.2, >= 3.2.5)
       rubyzip (>= 1.2.2)
-    thin (1.8.0)
+    sinatra (3.1.0)
+      mustermann (~> 3.0)
+      rack (~> 2.2, >= 2.2.4)
+      rack-protection (= 3.1.0)
+      tilt (~> 2.0)
+    thin (1.8.2)
       daemons (~> 1.0, >= 1.0.9)
       eventmachine (~> 1.0, >= 1.0.4)
       rack (>= 1, < 3)
+    tilt (2.3.0)
     tzinfo (2.0.5)
       concurrent-ruby (~> 1.0)
-    websocket-driver (0.7.3)
-      websocket-extensions (>= 0.1.0)
-    websocket-extensions (0.1.5)
     xpath (3.2.0)
       nokogiri (~> 1.8)
     zeitwerk (2.6.0)
@@ -98,14 +99,14 @@ PLATFORMS
 DEPENDENCIES
   activesupport (~> 6.0)
   byebug
-  capybara (= 3.36.0)
+  capybara (>= 3)
   capybara-lockstep!
-  chrome_remote
   gemika (>= 0.8.1)
-  jasmine
+  puma
   rake (~> 13.0)
   rspec (~> 3.0)
-  selenium-webdriver (= 4.1.0)
+  selenium-webdriver (>= 4)
+  sinatra
   thin
 
 BUNDLED WITH

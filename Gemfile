@@ -5,17 +5,14 @@ source "https://rubygems.org"
 # Specify your gem's dependencies in capybara-lockstep.gemspec
 gemspec
 
+gem 'activesupport', '~> 6.0'
 gem "rake", "~> 13.0"
 
 gem "rspec", "~> 3.0"
-gem 'jasmine'
+gem 'sinatra'
 gem 'thin' # ruby 3 does not include a webserver
-gem 'chrome_remote'
-
+gem 'puma'
 gem 'byebug'
 gem 'gemika', '>= 0.8.1'
-
-gem 'activesupport', '~> 6.0'
-
-gem 'capybara', '= 3.36.0' # last version compatible with Ruby < 2.7, which is in our test matrix
-gem 'selenium-webdriver', '=4.1.0' # last version compatible with Ruby < 2.7, which is in our test matrix
+gem 'capybara', '>= 3'
+gem 'selenium-webdriver', '>= 4'
