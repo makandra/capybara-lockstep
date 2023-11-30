@@ -19,7 +19,7 @@ module Capybara
         # to its `getLog` API. This causes Selenium to time out with a `Net::ReadTimeout` error
         page.driver.browser.switch_to.alert
         true
-      rescue Capybara::NotSupportedByDriverError, ::Selenium::WebDriver::Error::NoSuchAlertError
+      rescue Capybara::NotSupportedByDriverError, ::Selenium::WebDriver::Error::NoSuchAlertError, ::Selenium::WebDriver::Error::NoSuchWindowError
         false
       end
 

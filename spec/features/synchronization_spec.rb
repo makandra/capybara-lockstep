@@ -92,6 +92,26 @@ describe 'synchronization' do
       page.accept_confirm('OK to proceed?')
     end
 
+    it 'does not crash if the click closes the window' do
+      App.start_html = <<~HTML
+        <a href="/start" target="_blank"">open window</a>
+        <a href="#" onclick="window.close()"">close window</a>
+      HTML
+
+      visit '/start'
+
+      window = window_opened_by do
+        find('a', text: 'open window').click
+      end
+
+      expect do
+        within_window(window) do
+          find('a', text: 'close window').click
+        end
+      end.to_not raise_error
+
+    end
+
   end
 
   describe 'when reading elements' do

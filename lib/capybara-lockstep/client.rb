@@ -7,6 +7,7 @@ module Capybara
       ERROR_SNIPPET_MISSING = 'Cannot synchronize: capybara-lockstep JavaScript snippet is missing'
       ERROR_PAGE_MISSING = 'Cannot synchronize with empty page'
       ERROR_ALERT_OPEN = 'Cannot synchronize while an alert is open'
+      ERROR_WINDOW_CLOSED = 'Cannot synchronize with closed window'
       ERROR_NAVIGATED_AWAY = "Browser navigated away while synchronizing"
 
       SYNCHRONIZED_IVAR = :@lockstep_synchronized_client
@@ -94,7 +95,11 @@ module Capybara
           end
         rescue ::Selenium::WebDriver::Error::UnexpectedAlertOpenError
           log ERROR_ALERT_OPEN
-          # Don't raise an error, this will happen in an innocent test.
+          # Don't raise an error, this will happen in an innocent test where a click opens an alert.
+          # We will retry on the next Capybara synchronize call.
+        rescue ::Selenium::WebDriver::Error::NoSuchWindowError
+          log ERROR_WINDOW_CLOSED
+          # Don't raise an error, this will happen in an innocent test where a click closes a window.
           # We will retry on the next Capybara synchronize call.
         rescue ::Selenium::WebDriver::Error::JavascriptError => e
           # When the URL changes while a script is running, my current selenium-webdriver
