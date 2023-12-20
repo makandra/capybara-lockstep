@@ -6,7 +6,7 @@ module Capybara
           message = "[capybara-lockstep] #{message}"
           if is_logger?(Lockstep.debug)
             # If someone set Capybara::Lockstep.debug to a logger, use that
-            Lockstep.debug(message)
+            Lockstep.debug.debug(message)
           else
             # Otherwise print to STDOUT
             puts message
