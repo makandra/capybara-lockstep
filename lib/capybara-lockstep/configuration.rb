@@ -35,7 +35,7 @@ module Capybara
         end
 
         send_config_to_browser(<<~JS)
-          CapybaraLockstep.debug = #{value.to_json}
+          CapybaraLockstep.debug = #{debug?.to_json}
         JS
 
         @debug
