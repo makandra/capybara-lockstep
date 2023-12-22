@@ -432,3 +432,5 @@ The gem is available as open source under the terms of the [MIT License](https:/
 ## Credits
 
 Henning Koch ([@triskweline](https://twitter.com/triskweline)) from [makandra](https://makandra.com).
+
+CHANGE
