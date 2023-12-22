@@ -377,7 +377,7 @@ It is theoretically possible that your test will observe the browser in that win
 Any issues caused by this will usually be mitigated by Capybara's retry logic. **If** you think that this is an issue for your test suite, you can configure capybara-headless to wait additional tasks before it considers the browser to be idle:
 
 ```ruby
-Capybara::Lockstep.wait_tasks = 2 // default is 1
+Capybara::Lockstep.wait_tasks = 2 # default is 1
 ```
 
 If you see longer chains of `then()` or nested `setTimeout()` calls in your code, you may need to configure a higher number of tasks to wait.
