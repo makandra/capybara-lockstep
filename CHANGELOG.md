@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+# 2.0.2
+
+- Fix a bug where setting a logger object with `Capybara::Lockstep.debug = logger` would crash (by @dorianmarie).
+
+
 # 2.0.1
 
 - Don't crash when an interaction closes the window (tab).
