@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+# 2.0.3
+
+- Fix a bug where we wouldn't wait for an additional JavaScript task after a tracked event or async job.
+- Fix a bug where the `Capybara::Lockstep.wait_tasks` configuration would be ignored.
+- Fix a bug where the `capybara_lockstep_js` helper (for use without Rails) would not include the current configuration. 
+
+
 # 2.0.2
 
 - Fix a bug where setting a logger object with `Capybara::Lockstep.debug = logger` would crash (by @dorianmarie).
