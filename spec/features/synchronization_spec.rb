@@ -112,6 +112,24 @@ describe 'synchronization' do
 
     end
 
+    it 'stays busy for the configured number of tasks' do
+      Capybara::Lockstep.mode = :off
+      Capybara::Lockstep.wait_tasks = 10
+
+      App.start_html = <<~HTML
+        <a href="#">label</a>
+      HTML
+
+      visit '/start'
+      page.find('a').click
+
+      expect(page.evaluate_script('CapybaraLockstep.isBusy()')).to eq(true)
+
+      sleep (0.004 * 10)
+
+      expect(page.evaluate_script('CapybaraLockstep.isBusy()')).to eq(false)
+    end
+
   end
 
   describe 'when reading elements' do
