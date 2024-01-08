@@ -3,10 +3,10 @@ module Capybara
     module Helper
 
       JS_PATH = File.expand_path('../helper.js', __FILE__)
-      JS = IO.read(JS_PATH)
+      HELPER_JS = IO.read(JS_PATH)
 
-      def capybara_lockstep_js
-        JS
+      def capybara_lockstep_js(options = {})
+        HELPER_JS + capybara_lockstep_config_js(options)
       end
 
       def capybara_lockstep(options = {})
@@ -17,9 +17,10 @@ module Capybara
           tag_options[:nonce] = options.fetch(:nonce, true)
         end
 
-        js = capybara_lockstep_js + capybara_lockstep_config_js(options)
-        javascript_tag(js, tag_options)
+        javascript_tag(capybara_lockstep_js(options), tag_options)
       end
+
+      private
 
       def capybara_lockstep_config_js(options = {})
         js = ''

@@ -40,6 +40,7 @@ end
 
 RSpec.configure do |config|
   config.before(:each) do
+    Capybara::Lockstep.wait_tasks = nil
     Capybara::Lockstep.timeout = 5
     Capybara::Lockstep.debug = false
     Capybara::Lockstep.mode = :auto
