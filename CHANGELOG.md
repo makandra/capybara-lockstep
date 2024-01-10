@@ -3,9 +3,17 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+# 2.1.0
+
+- We now synchronize for an additional [JavaScript task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/) after `history.pushState()`, `history.replaceState()`, `history.forward()`, `history.back()` and `history.go()`.
+- We now synchronize for an additional JavaScript task after `popstate` and `hashchange` events.
+- We now synchronize for an additional JavaScript task when the window is resized.
+- You can now disable automatic synchronization for the duration of a block: `Capybara::Lockstep.with_mode(:manual) { ... }`.
+
+
 # 2.0.3
 
-- Fix a bug where we wouldn't wait for an additional JavaScript task after a tracked event or async job.
+- Fix a bug where we wouldn't wait for an additional [JavaScript task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/) after a tracked event or async job.
 - Fix a bug where the `Capybara::Lockstep.wait_tasks` configuration would be ignored.
 - Fix a bug where the `capybara_lockstep_js` helper (for use without Rails) would not include the current configuration. 
 
