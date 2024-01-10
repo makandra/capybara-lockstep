@@ -58,7 +58,7 @@ module Capybara
         self.mode = temporary_mode
         block.call
       ensure
-        self.mode = temporary_mode
+        self.mode = old_mode
       end
 
       def enabled=(enabled)

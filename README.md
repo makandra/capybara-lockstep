@@ -349,7 +349,23 @@ ensure
 end
 ```
 
-In the `:manual` mode you may still force synchronization by calling `Capybara::Lockstep.synchronize` manually.
+You can also disable automatic synchronization for the duration of a block:
+
+```ruby
+Capybara::Lockstep.with_mode(:manual) do
+  do_unsynchronized_work
+end
+```
+
+In the `:manual` mode you may still force synchronization by calling `Capybara::Lockstep.synchronize` manually:
+
+```ruby
+Capybara::Lockstep.with_mode(:manual) do
+  do_some_work
+  Capybara::Lockstep.synchronize
+  do_other_work
+end
+```
 
 To completely disable synchronization, even when `Capybara::Lockstep.synchronize` is called:
 
@@ -357,6 +373,8 @@ To completely disable synchronization, even when `Capybara::Lockstep.synchronize
 Capybara::Lockstep.mode = :off
 Capybara::Lockstep.synchronize # will not synchronize
 ```
+
+
 
 
 
