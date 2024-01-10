@@ -182,4 +182,58 @@ describe 'synchronization' do
 
   end
 
+  describe 'history navigation' do
+
+    it 'stays busy for a bit after history.pushState()' do
+      visit '/start'
+
+      Capybara::Lockstep.mode = :manual
+
+      busy = page.evaluate_script(<<~JS)
+        (function() {
+          history.pushState({}, '', '/next')
+          return CapybaraLockstep.isBusy()
+        })()
+      JS
+
+      expect(busy).to be(true)
+
+      Capybara::Lockstep.synchronize
+
+      busy = page.evaluate_script(<<~JS)
+        CapybaraLockstep.isBusy()
+      JS
+
+      expect(busy).to be(false)
+    end
+
+    it 'stays busy for a bit when navigating through history' do
+      visit '/start'
+
+      Capybara::Lockstep.mode = :manual
+
+      page.evaluate_async_script(<<~JS)
+        let [done] = arguments
+        history.pushState({}, '', '/next')
+        setTimeout(done, 50)
+      JS
+
+      busy = page.evaluate_script(<<~JS)
+        (function() {
+          history.back()
+          return CapybaraLockstep.isBusy()
+        })()
+      JS
+
+      expect(busy).to be(true)
+
+      busy = page.evaluate_script(<<~JS)
+        CapybaraLockstep.isBusy()
+      JS
+
+      expect(busy).to be(false)
+    end
+
+  end
+
 end
