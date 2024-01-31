@@ -158,7 +158,23 @@ use Capybara::Lockstep::Middleware
 # Other middleware here
 ```
 
+### Configuring Selenium WebDriver (recommended)
 
+By default, webdrivers will automatically dismiss any user prompts (like alerts) when trying to perform an action.
+While capybara-lockstep carefully detects alerts before synchronizing, and will skip interaction with the browser to avoid accidentally dismissing alerts, it can not synchronize around some rare race conditions.
+
+[We recommend](https://makandracards.com/makandra/617366-how-to-configure-selenium-webdriver-to-not-automatically-close-alerts-or-other-browser-dialogs) you configure your webdriver to not automatically dismiss user prompts by setting the "unhandled prompt behavior" capability to [`ignore`](https://w3c.github.io/webdriver/#dfn-known-prompt-handling-approaches-table). Using "ignore", errors are raised like with the default behavior, but user prompts are kept open.
+
+For example, the Chrome driver can be configured like this:
+```ruby
+Capybara.register_driver(:selenium) do |app|
+  options = Selenium::WebDriver::Chrome::Options.new(
+    unhandled_prompt_behavior: 'ignore',
+    # ...
+  )
+  Capybara::Selenium::Driver.new(app, browser: :chrome, options: options)
+end
+```
 
 ### Verify successful integration
 
