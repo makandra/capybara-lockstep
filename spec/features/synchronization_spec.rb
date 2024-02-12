@@ -19,48 +19,200 @@ describe 'synchronization' do
       wait(0.5.seconds).for(command).to be_finished
     end
 
-    it 'waits until a dynamically inserted image has loaded' do
-      App.start_html = <<~HTML
-        <a href="#" onclick="img = document.createElement('img'); img.src = '/next'; document.body.append(img)">label</a>
-      HTML
+    describe 'dynamically inserted images' do
 
-      wall = Wall.new
-      App.next_action = -> do
-        wall.block
-        send_file_sync('spec/fixtures/image.png', 'image/png')
+      it 'waits until the has loaded' do
+        App.start_html = <<~HTML
+          <a href="#" onclick="
+            let img = document.createElement('img');
+            img.src = '/next';
+            document.body.append(img);
+          ">label</a>
+        HTML
+
+        wall = Wall.new
+        App.next_action = -> do
+          wall.block
+          send_file_sync('spec/fixtures/image.png', 'image/png')
+        end
+
+        visit '/start'
+        command = ObservableCommand.new { page.find('a').click  }
+        expect(command).to run_into_wall(wall)
+
+        wall.release
+
+        wait(0.5.seconds).for(command).to be_finished
+
+        expect('img').to be_loaded_image
       end
 
-      visit '/start'
-      command = ObservableCommand.new { page.find('a').click  }
-      expect(command).to run_into_wall(wall)
+      it 'waits until the has failed to load' do
+        App.start_html = <<~HTML
+          <a href="#" onclick="
+            let img = document.createElement('img');
+            img.src = '/next';
+            document.body.append(img);
+          ">label</a>
+        HTML
 
-      wall.release
+        wall = Wall.new
+        App.next_action = -> do
+          wall.block
+          halt 404
+        end
 
-      wait(0.5.seconds).for(command).to be_finished
+        visit '/start'
+        command = ObservableCommand.new { page.find('a').click  }
+        expect(command).to run_into_wall(wall)
 
-      expect('img').to be_loaded_image
+        wall.release
+
+        wait(0.5.seconds).for(command).to be_finished
+
+        expect('img').to be_broken_image
+      end
+
+      it 'does not wait forever for an image with a data: source' do
+        App.start_html = <<~HTML
+          <a href="#" onclick="
+            let img = document.createElement('img');
+            img.src = `data:image/png;base64,#{Base64.encode64(File.read('spec/fixtures/image.png')).gsub("\n", '')}`;
+            document.body.append(img);
+          ">label</a>
+        HTML
+
+        visit '/start'
+        command = ObservableCommand.new { page.find('a').click  }
+        command.execute
+
+        wait(0.1.seconds).for(command).to be_finished
+
+        expect('img').to be_loaded_image
+      end
+
+      it 'does not wait for an image with [loading=lazy]' do
+        App.start_html = <<~HTML
+          <a href="#" onclick="
+            let img = document.createElement('img');
+            img.setAttribute('loading', 'lazy');
+            img.src =' /next';
+            document.body.append(img);
+          ">label</a>
+
+          #{(1...500).map { |i| "<p>#{i}</p>" }.join}
+        HTML
+
+        server_spy = double('server action', reached: nil)
+
+        App.next_action = -> do
+          server_spy.reached
+        end
+
+        visit '/start'
+        command = ObservableCommand.new { page.find('a').click  }
+        command.execute
+
+        wait(0.1.seconds).for(command).to be_finished
+
+        expect(server_spy).to_not have_received(:reached)
+      end
+
     end
 
-    it 'waits until a dynamically inserted image has failed to load' do
-      App.start_html = <<~HTML
-        <a href="#" onclick="img = document.createElement('img'); img.src = '/next'; document.body.append(img)">label</a>
-      HTML
+    describe 'dynamically inserted iframes' do
 
-      wall = Wall.new
-      App.next_action = -> do
-        wall.block
-        halt 404
+      it 'waits until the iframe has loaded' do
+        App.start_html = <<~HTML
+          <a href="#" onclick="
+            let iframe = document.createElement('iframe');
+            iframe.src = '/next';
+            document.body.append(iframe);
+          ">label</a>
+        HTML
+
+        wall = Wall.new
+        App.next_action = -> do
+          wall.block
+          render_body('hello from iframe')
+        end
+
+        visit '/start'
+        command = ObservableCommand.new { page.find('a').click  }
+        expect(command).to run_into_wall(wall)
+
+        wall.release
+
+        wait(0.5.seconds).for(command).to be_finished
       end
 
-      visit '/start'
-      command = ObservableCommand.new { page.find('a').click  }
-      expect(command).to run_into_wall(wall)
+      it 'waits until the iframe has failed to load' do
+        App.start_html = <<~HTML
+          <a href="#" onclick="
+            let iframe = document.createElement('iframe');
+            iframe.src = '/next';
+            document.body.append(iframe);
+          ">label</a>
+        HTML
 
-      wall.release
+        wall = Wall.new
+        App.next_action = -> do
+          wall.block
+          halt 500
+        end
 
-      wait(0.5.seconds).for(command).to be_finished
+        visit '/start'
+        command = ObservableCommand.new { page.find('a').click  }
+        expect(command).to run_into_wall(wall)
 
-      expect('img').to be_broken_image
+        wall.release
+
+        wait(0.5.seconds).for(command).to be_finished
+      end
+
+      it 'does not wait forever for an iframe with a data: source' do
+        App.start_html = <<~HTML
+          <a href="#" onclick="
+            let iframe = document.createElement('iframe');
+            iframe.src = `data:text/html;base64,#{Base64.encode64('hello from iframe').gsub("\n", '')}`;
+            document.body.append(iframe);
+          ">label</a>
+        HTML
+
+        visit '/start'
+        command = ObservableCommand.new { page.find('a').click  }
+        command.execute
+
+        wait(0.1.seconds).for(command).to be_finished
+      end
+
+      it 'does not wait for an iframe with [loading=lazy]' do
+        App.start_html = <<~HTML
+          <a href="#" onclick="
+            let iframe = document.createElement('iframe');
+            iframe.setAttribute('loading', 'lazy');
+            iframe.src =' /next';
+            document.body.append(iframe);
+          ">label</a>
+
+          #{(1...500).map { |i| "<p>#{i}</p>" }.join}
+        HTML
+
+        server_spy = double('server action', reached: nil)
+
+        App.next_action = -> do
+          server_spy.reached
+        end
+
+        visit '/start'
+        command = ObservableCommand.new { page.find('a').click  }
+        command.execute
+
+        wait(0.1.seconds).for(command).to be_finished
+
+        expect(server_spy).to_not have_received(:reached)
+      end
+
     end
 
     describe 'dynamically inserted video elements' do
