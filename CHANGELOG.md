@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+# 2.2.0
+
+- We now wait for `<video>` and `<audio>` elements to load their metadata. This addresses a race condition where a media element is inserted into the DOM, but another user action deletes or renames the source before the browser could load the initial metadata frames. 
+- We now wait for `<script type="module">`.
+- We no longer wait for `<img loading="lazy">` or `<iframe loading="lazy">`. This prevents a deadlock where we would wait forever for an element that defers loading until it is scrolled into the viewport.
+
+
 # 2.1.0
 
 - We now synchronize for an additional [JavaScript task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/) after `history.pushState()`, `history.replaceState()`, `history.forward()`, `history.back()` and `history.go()`.
