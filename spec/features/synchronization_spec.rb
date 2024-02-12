@@ -255,26 +255,86 @@ describe 'synchronization' do
 
     end
 
-    it 'waits until a dynamically inserted script has loaded' do
-      App.start_html = <<~HTML
-        <a href="#" onclick="script = document.createElement('script'); script.src = '/next'; document.body.append(script)">label</a>
-      HTML
+    describe 'dynamically loaded scripts' do
 
-      wall = Wall.new
-      App.next_action = -> do
-        wall.block
-        content_type 'text/javascript'
-        'document.body.style.backgroundColor = "blue"'
+      it 'waits until a <script> has loaded' do
+        App.start_html = <<~HTML
+          <a href="#" onclick="
+            let script = document.createElement('script');
+            script.src = '/next';
+            document.body.append(script);
+          ">label</a>
+        HTML
+
+        wall = Wall.new
+        App.next_action = -> do
+          wall.block
+          content_type 'text/javascript'
+          'document.body.style.backgroundColor = "blue"'
+        end
+
+        visit '/start'
+
+        command = ObservableCommand.new { page.find('a').click  }
+        expect(command).to run_into_wall(wall)
+
+        wall.release
+
+        wait(0.5.seconds).for(command).to be_finished
       end
 
-      visit '/start'
+      it 'waits until a <script type="module"> has loaded' do
+        App.start_html = <<~HTML
+          <a href="#" onclick="
+            let script = document.createElement('script');
+            script.type = 'module';
+            script.src = '/next';
+            document.body.append(script);
+          ">label</a>
+        HTML
 
-      command = ObservableCommand.new { page.find('a').click  }
-      expect(command).to run_into_wall(wall)
+        wall = Wall.new
+        App.next_action = -> do
+          wall.block
+          content_type 'text/javascript'
+          'document.body.style.backgroundColor = "blue"'
+        end
 
-      wall.release
+        visit '/start'
 
-      wait(0.5.seconds).for(command).to be_finished
+        command = ObservableCommand.new { page.find('a').click  }
+        expect(command).to run_into_wall(wall)
+
+        wall.release
+
+        wait(0.5.seconds).for(command).to be_finished
+      end
+
+      it 'does not wait forever for an inline script' do
+        App.start_html = <<~HTML
+          <a href="#" onclick="
+            let script = document.createElement('script');
+            script.innerText = 'window.EFFECT = 123';
+            document.body.append(script);
+          ">label</a>
+        HTML
+
+        wall = Wall.new
+        App.next_action = -> do
+          wall.block
+          content_type 'text/javascript'
+          'document.body.style.backgroundColor = "blue"'
+        end
+
+        visit '/start'
+
+        command = ObservableCommand.new { page.find('a').click  }
+        command.execute
+        wait(0.1.seconds).for(command).to be_finished
+
+        expect(evaluate_script('EFFECT')).to eq(123)
+      end
+
     end
 
     it 'does not close an alert that was opened on click' do
