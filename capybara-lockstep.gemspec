@@ -15,7 +15,7 @@ Gem::Specification.new do |spec|
   spec.metadata["source_code_uri"] = spec.homepage
 
   spec.metadata["bug_tracker_uri"] = "https://github.com/makandra/capybara-lockstep/issues"
-  spec.metadata["changelog_uri"] = "https://github.com/makandra/capybara-lockstep/blob/master/CHANGELOG.md"
+  spec.metadata["changelog_uri"] = "https://github.com/makandra/capybara-lockstep/blob/main/CHANGELOG.md"
   spec.metadata["rubygems_mfa_required"] = 'true'
 
   # Specify which files should be added to the gem when it is released.
