@@ -39,4 +39,9 @@ class App < Sinatra::Base
     HTML
   end
 
+  def send_file_sync(path, mime_type)
+    content_type mime_type
+    File.read(path)
+  end
+
 end

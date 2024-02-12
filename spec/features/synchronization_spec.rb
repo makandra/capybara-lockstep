@@ -27,8 +27,7 @@ describe 'synchronization' do
       wall = Wall.new
       App.next_action = -> do
         wall.block
-        content_type 'image/png'
-        Base64.decode64('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=')
+        send_file_sync('spec/fixtures/image.jpg', 'image/jpeg')
       end
 
       visit '/start'
@@ -38,6 +37,8 @@ describe 'synchronization' do
       wall.release
 
       wait(0.5.seconds).for(command).to be_finished
+
+      expect('img').to be_loaded_image
     end
 
     it 'waits until a dynamically inserted image has failed to load' do
@@ -58,6 +59,8 @@ describe 'synchronization' do
       wall.release
 
       wait(0.5.seconds).for(command).to be_finished
+
+      expect('img').to be_broken_image
     end
 
     it 'waits until a dynamically inserted script has loaded' do
