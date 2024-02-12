@@ -72,6 +72,7 @@ When capybara-lockstep synchronizes it will:
 - wait for any pending AJAX requests to finish and their callbacks to be called.
 - wait for dynamically inserted `<script>`s to load (e.g. from [dynamic imports](https://webpack.js.org/guides/code-splitting/#dynamic-imports) or Analytics snippets).
 - waits for dynamically inserted `<img>` or `<iframe>` elements to load.
+- waits for dynamically inserted `<audio>` and `<video>` elements to load their [metadata](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/loadedmetadata_event)
 
 In summary Capybara can no longer observe or interact with the page while HTTP requests are in flight.
 This covers most async work that causes flaky tests.
