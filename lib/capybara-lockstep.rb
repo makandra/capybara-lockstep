@@ -1,5 +1,11 @@
 require 'capybara'
-require 'selenium-webdriver'
+begin
+  require 'selenium-webdriver'
+  if Selenium::WebDriver::VERSION < '4.0.0'
+    raise "capybara-lockstep requires selenium-webdriver >= 4.0.0"
+  end
+rescue LoadError
+end
 require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/module/delegation'
 
