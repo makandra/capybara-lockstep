@@ -100,6 +100,7 @@ Check if your application satisfies all requirements for capybara-lockstep:
 
 - Capybara 2.0 or higher.
 - Your Capybara driver must use [selenium-webdriver](https://rubygems.org/gems/selenium-webdriver/) 3.0 or higher. capybara-lockstep deactivates itself for any other driver.
+  There is a [fork](https://github.com/Skalar/capybara-lockstep/tree/playwright-driver) with support for [capybara-playwright-driver](https://github.com/YusukeIwaki/capybara-playwright-driver).
 - This gem was only tested with a Selenium-controlled Chrome browser. [Chrome in headless mode](https://makandracards.com/makandra/492109-running-capybara-tests-in-headless-chrome) is recommended, but not required.
 - This gem was only tested with Rails, but there's no Rails dependency.
 
