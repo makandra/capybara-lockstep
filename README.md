@@ -84,7 +84,6 @@ Async work not synchronized by capybara-lockstep includes:
 
 - Animations
 - Websocket connections
-- Media elements (`<video>`, `<audio>`)
 - Service workers
 - Work scheduled via `setTimeout()` or `setInterval()`.
 
