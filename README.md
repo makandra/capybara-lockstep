@@ -2,14 +2,14 @@
 
 This Ruby gem synchronizes [Capybara](https://github.com/teamcapybara/capybara) commands with client-side JavaScript and AJAX requests. This greatly improves the stability of an end-to-end ("E2E") test suite, even if that suite has timing issues.
 
-The next section explain why your test suite is flaky and how capybara-lockstep can help.\
+The next section explains why your test suite is flaky and how capybara-lockstep can help.\
 If you don't care you may **skip to [installation instructions](#installation)**.
 
 
 Why are tests flaky?
 --------------------
 
-A naively written E2E test will have [race conditions](https://makandracards.com/makandra/47336-fixing-flaky-integration-tests) between the test script and the controlled browser. How often these timing issues will fail your test depends on luck and your machine's performance. You may not see these issues for years until a colleague runs your suite on their new laptop.
+A naively written E2E test will have [race conditions](https://makandracards.com/makandra/47336-fixing-flaky-integration-tests) between the test script and the controlled browser. How often these timing issues will cause your tests to fail depends on luck and your machine's performance. You may not see these issues for years until a colleague runs your suite on their new laptop.
 
 Here is a typical example for a test that will fail with unlucky timing:
 
@@ -26,10 +26,10 @@ end
 
 This test has four timing issues that may cause it to fail:
 
-1. We click on the *New tweet* button, but the the JS event handler to open the tweet form wasn't registered yet.
-2. We start filling in the form, but it wasn't loaded yet.
+1. We click on the *New tweet* button, but the JS event handler to open the tweet form hasn't been registered yet.
+2. We start filling in the form, but it hasn't been loaded yet.
 3. After sending the tweet we immediately navigate away, killing the form submission request that is still in flight. Hence the tweet will never appear in the next step.
-4. We look for the new tweet, but the timeline wasn't loaded yet.
+4. We look for the new tweet, but the timeline hasn't been loaded yet.
 
 [Capybara will retry](https://github.com/teamcapybara/capybara#asynchronous-javascript-ajax-and-friends) individual commands or expectations when they fail.\
 However, only issues **2** and **4** can be healed by retrying.
@@ -71,10 +71,10 @@ When capybara-lockstep synchronizes it will:
 - wait for client-side JavaScript to render or hydrate DOM elements.
 - wait for any pending AJAX requests to finish and their callbacks to be called.
 - wait for dynamically inserted `<script>`s to load (e.g. from [dynamic imports](https://webpack.js.org/guides/code-splitting/#dynamic-imports) or Analytics snippets).
-- waits for dynamically inserted `<img>` or `<iframe>` elements to load (ignoring [lazy-loaded](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#lazy) elements).
-- waits for dynamically inserted `<audio>` and `<video>` elements to load their [metadata](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/loadedmetadata_event)
+- wait for dynamically inserted `<img>` or `<iframe>` elements to load (ignoring [lazy-loaded](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#lazy) elements).
+- wait for dynamically inserted `<audio>` and `<video>` elements to load their [metadata](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/loadedmetadata_event)
 
-In summary Capybara can no longer observe or interact with the page while HTTP requests are in flight.
+In summary, Capybara can no longer observe or interact with the page while HTTP requests are in flight.
 This covers most async work that causes flaky tests.
 
 
@@ -106,7 +106,7 @@ Check if your application satisfies all requirements for capybara-lockstep:
 
 ### Installing the Ruby gem
 
-Assuming that you're using Rails Add this line to your application's `Gemfile`:
+Assuming that you're using Rails, add this to your application's `Gemfile`:
 
 ```ruby
 group :test do
@@ -142,7 +142,7 @@ Ideally the snippet should be included in the `<head>` before any other `<script
 
 ### Including the middleware (optional)
 
-This gem provides a Rack middleware to block Capybara while your Rails (or Rack) backend is busy.
+This gem provides Rack middleware to block Capybara while your Rails (or Rack) backend is busy.
 
 Using the middleware is optional, as the [JavaScript snippet](#including-the-javascript-snippet-required) already for AJAX requests on the client. However, using the middleware covers some additional edge cases. For example, the middleware detects requests that were aborted on the frontend, but are still being processed by the backend.
 
