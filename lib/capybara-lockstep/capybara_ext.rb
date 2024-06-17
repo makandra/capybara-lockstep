@@ -3,36 +3,46 @@ require 'ruby2_keywords'
 module Capybara
   module Lockstep
     module SynchronizeMacros
+      def self.extended(by)
+        by.instance_eval do
+          prepend(@synchronize_before_module = Module.new)
+          prepend(@synchronize_after_module = Module.new)
+          prepend(@unsynchronize_after_module = Module.new)
+        end
+      end
 
       def synchronize_before(meth, lazy:)
-        mod = Module.new do
+        @synchronize_before_module.module_eval do
           define_method meth do |*args, &block|
-            Lockstep.auto_synchronize(lazy: lazy, log: "Synchronizing before ##{meth}")
+            @synchronize_before_count ||= 0
+            @synchronize_before_count += 1
+            Lockstep.auto_synchronize(lazy: lazy, log: "Synchronizing before ##{meth}") if @synchronize_before_count == 1
             super(*args, &block)
+          ensure
+            @synchronize_before_count -= 1
           end
 
           ruby2_keywords meth
         end
-
-        prepend(mod)
       end
 
       def synchronize_after(meth)
-        mod = Module.new do
+        @synchronize_after_module.module_eval do
           define_method meth do |*args, &block|
+            @synchronize_after_count ||= 0
+            @synchronize_after_count += 1
             super(*args, &block)
           ensure
-            Lockstep.auto_synchronize
+            Lockstep.auto_synchronize(log: "Synchronizing after ##{meth}") if @synchronize_after_count == 1
+            @synchronize_after_count -= 1
           end
 
           ruby2_keywords meth
         end
-
-        prepend(mod)
       end
 
       def unsynchronize_after(meth)
-        mod = Module.new do
+        @unsynchronize_after_module.module_eval do
           define_method meth do |*args, &block|
             super(*args, &block)
           ensure
@@ -41,10 +51,7 @@ module Capybara
 
           ruby2_keywords meth
         end
-
-        prepend(mod)
       end
-
     end
   end
 end
@@ -158,23 +165,23 @@ Capybara::Session.class_eval do
   synchronize_around_script_method :evaluate_async_script
 end
 
-# Capybara 3 has driver-specific Node classes which sometimes
-# super to Capybara::Selenium::Node, but not always.
-node_classes = [
+# In Capybara 3 there are the specialized classes for nodes for most browers.
+# We need to patch relevant methods on all of these.
+driver_specific_node_classes = [
   (Capybara::Selenium::ChromeNode  if defined?(Capybara::Selenium::ChromeNode)),
   (Capybara::Selenium::FirefoxNode if defined?(Capybara::Selenium::FirefoxNode)),
   (Capybara::Selenium::SafariNode  if defined?(Capybara::Selenium::SafariNode)),
   (Capybara::Selenium::EdgeNode    if defined?(Capybara::Selenium::EdgeNode)),
   (Capybara::Selenium::IENode      if defined?(Capybara::Selenium::IENode)),
-].compact
+].compact.freeze
 
-if node_classes.empty?
-  # Capybara 2 has no driver-specific Node implementations,
-  # so we patch the shared base class.
-  node_classes = [Capybara::Selenium::Node]
-end
+# For other browsers (like the :remote browser) we instead get a generic node class.
+# This is also the case for Capybara 2.
+generic_node_classes = [
+  Capybara::Selenium::Node,
+].freeze
 
-node_classes.each do |node_class|
+[*driver_specific_node_classes, *generic_node_classes].each do |node_class|
   node_class.class_eval do
     extend Capybara::Lockstep::SynchronizeMacros
 
