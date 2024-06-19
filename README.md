@@ -144,7 +144,7 @@ Ideally the snippet should be included in the `<head>` before any other `<script
 
 This gem provides Rack middleware to block Capybara while your Rails (or Rack) backend is busy.
 
-Using the middleware is optional, as the [JavaScript snippet](#including-the-javascript-snippet-required) already for AJAX requests on the client. However, using the middleware covers some additional edge cases. For example, the middleware detects requests that were aborted on the frontend, but are still being processed by the backend.
+Using the middleware is optional, as the [JavaScript snippet](#including-the-javascript-snippet-required) already waits for asynchronous work on the client. However, using the middleware covers some additional edge cases. For example, the middleware detects requests that were aborted on the frontend, but are still being processed by the backend.
 
 To include the middleware in a Rails application, add the following line to `config/environments/test.rb`:
 
