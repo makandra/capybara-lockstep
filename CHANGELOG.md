@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 - We now only wait for `<script>` elements with a JavaScript type
 - We only wait for `<iframe>` elements with a `[src]` attribute
 - We no longer wait for `<iframe>` elements that have already finished loading
+- We no longer wait for `<video>` and `<audio>` elements to load their metadata. This did not work consistently, and would sometimes cause capybara-lockstep to wait indefinitely.
 
 
 # 2.2.1
