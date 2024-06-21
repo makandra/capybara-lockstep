@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-# Unreleased
+# 2.2.2
 
 - We now only wait for `<script>` elements with a JavaScript type
 - We only wait for `<iframe>` elements with a `[src]` attribute
