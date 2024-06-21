@@ -462,6 +462,30 @@ describe 'synchronization' do
         wait(0.5.seconds).for(command).to be_finished
       end
 
+      it 'does not wait for a <script> with a non-JavaScript [type]' do
+        App.start_html = <<~HTML
+          <a href="#" onclick="
+            let script = document.createElement('script');
+            script.type = 'text/dreamberd';
+            script.src = '/next';
+            document.body.append(script);
+          ">label</a>
+        HTML
+
+        wall = Wall.new
+        App.next_action = -> do
+          wall.block
+          content_type 'text/dreamberd'
+          'const const scores = [3, 2, 5]'
+        end
+
+        visit '/start'
+
+        command = ObservableCommand.new { page.find('a').click  }
+        command.execute
+        wait(0.5.seconds).for(command).to be_finished
+      end
+
       it 'does not wait forever for an inline script' do
         App.start_html = <<~HTML
           <a href="#" onclick="

@@ -2,6 +2,12 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+
+# Unreleased
+
+- We no longer wait for `<script>` elements that do not load JavaScript
+
+
 # 2.2.1
 
 - Fixed a bug that disabled most functionality for drivers with `browser: :remote`.
