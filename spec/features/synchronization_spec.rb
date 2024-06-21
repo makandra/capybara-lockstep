@@ -16,7 +16,7 @@ describe 'synchronization' do
 
       wall.release
 
-      wait(0.5.seconds).for(command).to be_finished
+      wait(0.5.seconds).for { command }.to be_finished
     end
 
     describe 'dynamically inserted images' do
@@ -42,7 +42,7 @@ describe 'synchronization' do
 
         wall.release
 
-        wait(0.5.seconds).for(command).to be_finished
+        wait(0.5.seconds).for { command }.to be_finished
 
         expect('img').to be_loaded_image
       end
@@ -68,7 +68,7 @@ describe 'synchronization' do
 
         wall.release
 
-        wait(0.5.seconds).for(command).to be_finished
+        wait(0.5.seconds).for { command }.to be_finished
 
         expect('img').to be_broken_image
       end
@@ -86,7 +86,7 @@ describe 'synchronization' do
         command = ObservableCommand.new { page.find('a').click  }
         command.execute
 
-        wait(0.1.seconds).for(command).to be_finished
+        wait(0.1.seconds).for { command }.to be_finished
 
         expect('img').to be_loaded_image
       end
@@ -113,7 +113,7 @@ describe 'synchronization' do
         command = ObservableCommand.new { page.find('a').click  }
         command.execute
 
-        wait(0.1.seconds).for(command).to be_finished
+        wait(0.1.seconds).for { command }.to be_finished
 
         expect(server_spy).to_not have_received(:reached)
       end
@@ -143,7 +143,7 @@ describe 'synchronization' do
 
         wall.release
 
-        wait(0.5.seconds).for(command).to be_finished
+        wait(0.5.seconds).for { command }.to be_finished
       end
 
       it 'waits until the iframe has failed to load' do
@@ -167,7 +167,7 @@ describe 'synchronization' do
 
         wall.release
 
-        wait(0.5.seconds).for(command).to be_finished
+        wait(0.5.seconds).for { command }.to be_finished
       end
 
       it 'does not wait forever for an iframe with a data: source' do
@@ -183,7 +183,7 @@ describe 'synchronization' do
         command = ObservableCommand.new { page.find('a').click  }
         command.execute
 
-        wait(0.1.seconds).for(command).to be_finished
+        wait(0.1.seconds).for { command }.to be_finished
       end
 
       it 'does not wait for an iframe with [loading=lazy]' do
@@ -208,7 +208,7 @@ describe 'synchronization' do
         command = ObservableCommand.new { page.find('a').click  }
         command.execute
 
-        wait(0.1.seconds).for(command).to be_finished
+        wait(0.1.seconds).for { command }.to be_finished
 
         expect(server_spy).to_not have_received(:reached)
       end
@@ -238,7 +238,7 @@ describe 'synchronization' do
 
         wall.release
 
-        wait(0.5.seconds).for(command).to be_finished
+        wait(0.5.seconds).for { command }.to be_finished
 
         expect('video').to be_media_element_with_metadata
       end
@@ -264,7 +264,7 @@ describe 'synchronization' do
 
         wall.release
 
-        wait(0.5.seconds).for(command).to be_finished
+        wait(0.5.seconds).for { command }.to be_finished
       end
 
       it 'does not wait forever for a video with a data: source' do
@@ -279,7 +279,7 @@ describe 'synchronization' do
         visit '/start'
         command = ObservableCommand.new { page.find('a').click  }
         command.execute
-        wait(0.1.seconds).for(command).to be_finished
+        wait(0.1.seconds).for { command }.to be_finished
         expect('video').to be_media_element_with_metadata
       end
 
@@ -302,7 +302,7 @@ describe 'synchronization' do
         visit '/start'
         command = ObservableCommand.new { page.find('a').click  }
         command.execute
-        wait(0.1.seconds).for(command).to be_finished
+        wait(0.1.seconds).for { command }.to be_finished
 
         expect(server_spy).to_not have_received(:reached)
 
@@ -331,7 +331,7 @@ describe 'synchronization' do
         command = ObservableCommand.new { page.find('a').click  }
         command.execute
 
-        wait(0.5.seconds).for(command).to be_finished
+        wait(0.5.seconds).for { command }.to be_finished
 
         expect('audio').to be_media_element_with_metadata
       end
@@ -358,7 +358,7 @@ describe 'synchronization' do
 
         wall.release
 
-        wait(0.5.seconds).for(command).to be_finished
+        wait(0.5.seconds).for { command }.to be_finished
       end
 
       it 'does not wait forever for a audio with a data: source' do
@@ -374,7 +374,7 @@ describe 'synchronization' do
         visit '/start'
         command = ObservableCommand.new { page.find('a').click  }
         command.execute
-        wait(0.1.seconds).for(command).to be_finished
+        wait(0.1.seconds).for { command }.to be_finished
         expect('audio').to be_media_element_with_metadata
       end
 
@@ -398,7 +398,7 @@ describe 'synchronization' do
         visit '/start'
         command = ObservableCommand.new { page.find('a').click  }
         command.execute
-        wait(0.1.seconds).for(command).to be_finished
+        wait(0.1.seconds).for { command }.to be_finished
 
         expect(server_spy).to_not have_received(:reached)
 
@@ -432,7 +432,7 @@ describe 'synchronization' do
 
         wall.release
 
-        wait(0.5.seconds).for(command).to be_finished
+        wait(0.5.seconds).for { command }.to be_finished
       end
 
       it 'waits until a <script type="module"> has loaded' do
@@ -459,7 +459,7 @@ describe 'synchronization' do
 
         wall.release
 
-        wait(0.5.seconds).for(command).to be_finished
+        wait(0.5.seconds).for { command }.to be_finished
       end
 
       it 'does not wait for a <script> with a non-JavaScript [type]' do
@@ -483,7 +483,7 @@ describe 'synchronization' do
 
         command = ObservableCommand.new { page.find('a').click  }
         command.execute
-        wait(0.5.seconds).for(command).to be_finished
+        wait(0.5.seconds).for { command }.to be_finished
       end
 
       it 'does not wait forever for an inline script' do
@@ -506,7 +506,7 @@ describe 'synchronization' do
 
         command = ObservableCommand.new { page.find('a').click  }
         command.execute
-        wait(0.1.seconds).for(command).to be_finished
+        wait(0.1.seconds).for { command }.to be_finished
 
         expect(evaluate_script('EFFECT')).to eq(123)
       end
