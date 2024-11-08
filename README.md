@@ -9,6 +9,8 @@ If you don't care you may **skip to [installation instructions](#installation)**
 Why are tests flaky?
 --------------------
 
+> Watch as a video: [▶️ Fixing Flaky E2E Tests](https://www.youtube.com/watch?v=LaCwiFDm2Vs)
+
 A naively written E2E test will have [race conditions](https://makandracards.com/makandra/47336-fixing-flaky-integration-tests) between the test script and the controlled browser. How often these timing issues will cause your tests to fail depends on luck and your machine's performance. You may not see these issues for years until a colleague runs your suite on their new laptop.
 
 Here is a typical example for a test that will fail with unlucky timing:
