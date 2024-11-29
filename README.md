@@ -8,6 +8,7 @@
 
 <h1>
   <span class="white-space: nowrap">capybara-lockstep</span>
+  <br>
   <a href="https://github.com/makandra/capybara-lockstep/actions"><img alt="Tests" src="https://github.com/makandra/capybara-lockstep/actions/workflows/test.yml/badge.svg"></a>
 </h1>
 
