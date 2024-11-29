@@ -1,19 +1,24 @@
+<p>
+  <a href="https://makandra.de/">
+    <picture>
+      <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/makandra/capybara-lockstep/hk/readme-images/media/sponsored-by-makandra.light.svg">
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/makandra/capybara-lockstep/hk/readme-images/media/sponsored-by-makandra.dark.svg">
+      <img align="right" width="200" alt="Sponsored by makandra" src="https://raw.githubusercontent.com/makandra/capybara-lockstep/hk/readme-images/media/sponsored-by-makandra.light.svg">
+    </picture>
+  </a>
 
-<h1>
-  capybara-lockstep
-  <br>
+  <picture>
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/makandra/capybara-lockstep/hk/readme-images/media/unpoly-logo.light.svg">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/makandra/capybara-lockstep/hk/readme-images/media/unpoly-logo.dark.svg">
+    <img width="430" alt="capybara-lockstep" role="heading" aria-level="1" src="https://raw.githubusercontent.com/makandra/capybara-lockstep/hk/readme-images/media/capybara-lockstep.light.png">
+  </picture>
+</p>
+
+<p>
   <a href="https://github.com/makandra/capybara-lockstep/actions">
     <img alt="Tests" src="https://github.com/makandra/capybara-lockstep/actions/workflows/test.yml/badge.svg">
   </a>
-
-  <a href="https://makandra.de/">
-    <picture>
-      <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/makandra/capybara-lockstep/hk/readme-images/media/makandra.light.svg">
-      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/makandra/capybara-lockstep/hk/readme-images/media/makandra.dark.svg">
-      <img width="150" alt="By makandra" src="https://raw.githubusercontent.com/makandra/capybara-lockstep/hk/readme-images/media/makandra.light.svg">
-    </picture>
-  </a>
-</h1>
+</p>
 
 This Ruby gem synchronizes [Capybara](https://github.com/teamcapybara/capybara) commands with client-side JavaScript and AJAX requests. This greatly improves the stability of an end-to-end ("E2E") test suite, even if that suite has timing issues.
 
