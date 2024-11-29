@@ -1,3 +1,11 @@
+<a href="https://makandra.de/">
+  <picture>
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/makandra/capybara-lockstep/hk/readme-images/media/sponsored-by-makandra.light.svg">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/makandra/capybara-lockstep/hk/readme-images/media/sponsored-by-makandra.dark.svg">
+    <img align="right" width="200" alt="Sponsored by makandra" src="https://raw.githubusercontent.com/makandra/capybara-lockstep/hk/readme-images/media/sponsored-by-makandra.light.svg">
+  </picture>
+</a>
+
 # capybara-lockstep [![Tests](https://github.com/makandra/capybara-lockstep/actions/workflows/test.yml/badge.svg)](https://github.com/makandra/capybara-lockstep/actions)
 
 This Ruby gem synchronizes [Capybara](https://github.com/teamcapybara/capybara) commands with client-side JavaScript and AJAX requests. This greatly improves the stability of an end-to-end ("E2E") test suite, even if that suite has timing issues.
