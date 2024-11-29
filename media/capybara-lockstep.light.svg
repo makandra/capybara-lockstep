@@ -40,7 +40,7 @@
        x2="88.956696"
        y2="91.071762"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(0.49563712,0,0,0.08820435,-10.931231,57.247323)" />
+       gradientTransform="matrix(1.5503049,0,0,0.08820435,-34.191832,57.247323)" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -49,9 +49,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.7"
-     inkscape:cx="325.82971"
-     inkscape:cy="71.114657"
+     inkscape:zoom="1.4"
+     inkscape:cx="296.30217"
+     inkscape:cy="27.962271"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -93,9 +93,9 @@
          y="59.630951"
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'League Spartan';-inkscape-font-specification:'League Spartan';stroke-width:0.26458332">CAPYBARA-LOCKSTEP</tspan></text>
     <rect
-       style="fill:url(#linearGradient1408);fill-opacity:1;stroke:none;stroke-width:0.02090869;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:url(#linearGradient1408);fill-opacity:1;stroke:none;stroke-width:0.03697885;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect1387"
-       width="33.159008"
+       width="103.71816"
        height="1.2668874"
        x="-3.5527137e-15"
        y="64.646805" />
