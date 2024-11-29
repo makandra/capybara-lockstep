@@ -8,8 +8,8 @@
   </a>
 
   <picture>
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/makandra/capybara-lockstep/hk/readme-images/media/unpoly-logo.light.svg">
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/makandra/capybara-lockstep/hk/readme-images/media/unpoly-logo.dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/makandra/capybara-lockstep/hk/readme-images/media/capybara-lockstep.light.svg">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/makandra/capybara-lockstep/hk/readme-images/media/capybara-lockstep.dark.svg">
     <img width="430" alt="capybara-lockstep" role="heading" aria-level="1" src="https://raw.githubusercontent.com/makandra/capybara-lockstep/hk/readme-images/media/capybara-lockstep.light.png">
   </picture>
 </p>
