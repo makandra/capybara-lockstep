@@ -10,7 +10,7 @@
     <picture>
       <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/makandra/capybara-lockstep/hk/readme-images/media/sponsored-by-makandra.light.svg">
       <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/makandra/capybara-lockstep/hk/readme-images/media/sponsored-by-makandra.dark.svg">
-      <img align="right" width="200" alt="Sponsored by makandra" src="https://raw.githubusercontent.com/makandra/capybara-lockstep/hk/readme-images/media/sponsored-by-makandra.light.svg">
+      <img width="150" alt="Sponsored by makandra" src="https://raw.githubusercontent.com/makandra/capybara-lockstep/hk/readme-images/media/sponsored-by-makandra.light.svg">
     </picture>
   </a>
 </h1>
