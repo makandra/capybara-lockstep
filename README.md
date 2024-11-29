@@ -8,9 +8,9 @@
   </a>
 
   <picture>
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/makandra/capybara-lockstep/hk/readme-images/media/capybara-lockstep.light.png">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/makandra/capybara-lockstep/hk/readme-images/media/capybara-lockstep2.light.png">
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/makandra/capybara-lockstep/hk/readme-images/media/capybara-lockstep.dark.png">
-    <img width="430" alt="capybara-lockstep" role="heading" aria-level="1" src="https://raw.githubusercontent.com/makandra/capybara-lockstep/hk/readme-images/media/capybara-lockstep.light.png">
+    <img width="430" alt="capybara-lockstep" role="heading" aria-level="1" src="https://raw.githubusercontent.com/makandra/capybara-lockstep/hk/readme-images/media/capybara-lockstep2.light.png">
   </picture>
 </p>
 
