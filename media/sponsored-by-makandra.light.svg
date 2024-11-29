@@ -13,11 +13,11 @@
    id="Ebene_1"
    x="0px"
    y="0px"
-   viewBox="0 0 600 235"
+   viewBox="0 0 600.00159 142.49001"
    xml:space="preserve"
-   sodipodi:docname="sponsored-by-makandra.svg"
-   width="600"
-   height="235"
+   sodipodi:docname="sponsored-by-makandra.light.svg"
+   width="600.00159"
+   height="142.49001"
    inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"><metadata
    id="metadata45"><rdf:RDF><cc:Work
        rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
@@ -36,12 +36,16 @@
    id="namedview41"
    showgrid="false"
    inkscape:zoom="1.0966667"
-   inkscape:cx="26.925545"
-   inkscape:cy="-40.09322"
+   inkscape:cx="-155.44367"
+   inkscape:cy="-136.25063"
    inkscape:window-x="1920"
    inkscape:window-y="0"
    inkscape:window-maximized="1"
-   inkscape:current-layer="Ebene_1" />
+   inkscape:current-layer="Ebene_1"
+   fit-margin-top="0"
+   fit-margin-left="0"
+   fit-margin-right="0"
+   fit-margin-bottom="0" />
 <style
    type="text/css"
    id="style2">
@@ -50,10 +54,10 @@
 </style>
 <g
    id="g38"
-   transform="translate(0,35.240002)">
+   transform="translate(0.00160084,35.240004)">
 	<polygon
    class="st0"
-   points="585.95,14.81 585.95,59.46 600,45.41 600,0.76 555.34,0.76 541.29,14.81 "
+   points="600,45.41 600,0.76 555.34,0.76 541.29,14.81 585.95,14.81 585.95,59.46 "
    id="polygon4"
    style="fill:#e61d47" />
 	<path
@@ -144,12 +148,12 @@
    id="g30">
 		<polygon
    class="st1"
-   points="204.35,73.98 235.93,42.41 216.05,42.41 184.48,73.98 216.05,105.56 235.93,105.56 "
+   points="216.05,42.41 184.48,73.98 216.05,105.56 235.93,105.56 204.35,73.98 235.93,42.41 "
    id="polygon26"
    style="fill:#141210" />
 		<polygon
    class="st1"
-   points="177.32,105.64 191.28,105.64 191.28,85.07 191.31,85.04 191.31,66.59 191.28,66.62 191.28,27.56 177.32,27.56 "
+   points="191.28,85.07 191.31,85.04 191.31,66.59 191.28,66.62 191.28,27.56 177.32,27.56 177.32,105.64 191.28,105.64 "
    id="polygon28"
    style="fill:#141210" />
 	</g>
@@ -175,12 +179,13 @@
 <text
    xml:space="preserve"
    style="font-style:normal;font-weight:normal;font-size:48.99800873px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.22495019"
-   x="1.2305772"
+   x="1.2321781"
    y="37.227001"
    id="text854"><tspan
      sodipodi:role="line"
      id="tspan852"
-     x="1.2305772"
+     x="1.2321781"
      y="37.227001"
      style="fill:#141210;fill-opacity:1;stroke-width:1.22495019">sponsored by</tspan></text>
+
 </svg>
