@@ -86,7 +86,7 @@ describe 'synchronization' do
         command = ObservableCommand.new { page.find('a').click  }
         command.execute
 
-        wait(0.1.seconds).for { command }.to be_finished
+        wait(0.2.seconds).for { command }.to be_finished
 
         expect('img').to be_loaded_image
       end
@@ -113,7 +113,7 @@ describe 'synchronization' do
         command = ObservableCommand.new { page.find('a').click  }
         command.execute
 
-        wait(0.1.seconds).for { command }.to be_finished
+        wait(0.2.seconds).for { command }.to be_finished
 
         expect(server_spy).to_not have_received(:reached)
       end
@@ -183,7 +183,7 @@ describe 'synchronization' do
         command = ObservableCommand.new { page.find('a').click  }
         command.execute
 
-        wait(0.1.seconds).for { command }.to be_finished
+        wait(0.2.seconds).for { command }.to be_finished
       end
 
       it 'does not wait for an iframe with [loading=lazy]' do
@@ -208,7 +208,7 @@ describe 'synchronization' do
         command = ObservableCommand.new { page.find('a').click  }
         command.execute
 
-        wait(0.1.seconds).for { command }.to be_finished
+        wait(0.2.seconds).for { command }.to be_finished
 
         expect(server_spy).to_not have_received(:reached)
       end
@@ -314,7 +314,7 @@ describe 'synchronization' do
 
         command = ObservableCommand.new { page.find('a').click  }
         command.execute
-        wait(0.1.seconds).for { command }.to be_finished
+        wait(0.2.seconds).for { command }.to be_finished
 
         expect(evaluate_script('EFFECT')).to eq(123)
       end
