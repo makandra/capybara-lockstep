@@ -2,6 +2,16 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+# Unreleased changes
+
+## Breaking changes
+
+-
+
+## Compatible changes
+
+- Additionally test against Ruby 3.4
+
 
 # 2.2.2
 
