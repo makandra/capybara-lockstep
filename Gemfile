@@ -17,3 +17,10 @@ gem 'byebug'
 gem 'gemika', '>= 0.8.1'
 gem 'capybara', '>= 3'
 gem 'selenium-webdriver', '>= 4'
+
+# The following gems were previously "default gems" (always available) and are now
+# "bundled gems" (need to be explicitly required). Not all gems in our Gemfile.lock (dev only) do that yet.
+# To avoid splitting the Gemfile.lock by Ruby version (gemika test setup), we instead require those
+# indirect dependencies ourselves.
+gem 'base64' # needed by selenium-webdriver (and potentially others)
+gem 'bigdecimal' # needed by activesupport (and potentially others)
