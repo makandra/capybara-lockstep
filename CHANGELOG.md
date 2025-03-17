@@ -10,7 +10,14 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Compatible changes
 
-- Additionally test against Ruby 3.4
+-
+
+
+# 2.2.3
+
+- Requiring the gem no longer force-loads ActionView (#22)
+- Calling `visit(nil)` visits the root route instead of crashing (#21)
+- Tested against Ruby 3.4 (in addition to 2.7 and 3.2)
 
 
 # 2.2.2
