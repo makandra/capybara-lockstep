@@ -83,7 +83,10 @@ module Capybara
   module Lockstep
     module VisitWithWaiting
       def visit(*args, &block)
-        url = args[0]
+        # For some reason, in Capybara proper, visit(nil) navigates to the root route.
+        # We mimic this behavior for (1) parity and (2) to not crash when we inspect the URL below.
+        url = args[0].presence || '/'
+
         # Some of our apps have a Cucumber step that changes drivers mid-scenario.
         # It works by creating a new Capybara session and re-visits the URL from the
         # previous session. If this happens before a URL is ever loaded,

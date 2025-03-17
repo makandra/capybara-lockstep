@@ -475,4 +475,14 @@ describe 'synchronization' do
 
   end
 
+  describe 'navigating with #visit' do
+
+    it 'does not crash and visits the root route when called with nil' do
+      visit(nil)
+
+      expect(page).to have_content('Root page')
+    end
+
+  end
+
 end

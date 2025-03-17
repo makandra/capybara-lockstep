@@ -7,6 +7,12 @@ class App < Sinatra::Base
   class_attribute :start_html, :start_script, :next_action
   delegate :start_html, :start_script, :next_action, :reset, to: :class
 
+  get '/' do
+    render_body(<<~HTML)
+      Root page
+    HTML
+  end
+
   get '/start' do
     render_body(<<~HTML)
       #{start_html}
