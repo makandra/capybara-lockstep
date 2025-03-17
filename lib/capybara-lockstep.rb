@@ -2,6 +2,7 @@ require 'capybara'
 require 'selenium-webdriver'
 require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/module/delegation'
+require 'active_support/lazy_load_hooks'
 
 module Capybara
   module Lockstep

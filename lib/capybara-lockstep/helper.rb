@@ -40,6 +40,6 @@ module Capybara
   end
 end
 
-if defined?(ActionView::Base)
-  ActionView::Base.send :include, Capybara::Lockstep::Helper
+ActiveSupport.on_load(:action_view) do
+  ActionView::Base.send(:include, Capybara::Lockstep::Helper)
 end
