@@ -485,4 +485,42 @@ describe 'synchronization' do
 
   end
 
+  describe 'settimeout' do
+    it 'waits for the timeout to complete' do
+      App.start_script = <<~JS
+        setTimeout(() => {
+          document.querySelector('body').textContent = 'adjusted page'
+        }, 500)
+      JS
+
+      visit '/start'
+
+      wait(0.5.seconds).for { page }.to have_content('adjusted page')
+    end
+
+    it 'does not wait for the timeout to complete if it takes > 5 sec' do
+      App.start_script = <<~JS
+        setTimeout(() => {
+          document.querySelector('body').textContent = 'adjusted page'
+        }, 6000)
+      JS
+
+      visit '/start'
+
+      wait(0.5.seconds).for { page }.not_to have_content('adjusted page')
+    end
+
+    it 'stops waiting if clearTimeout is called' do
+      App.start_script = <<~JS
+        let timeoutId = setTimeout(() => {
+          document.querySelector('body').textContent = 'adjusted page'
+        }, 500)
+        clearTimeout(timeoutId)
+      JS
+
+      visit '/start'
+
+      wait(0.5.seconds).for { page }.not_to have_content('adjusted page')
+    end
+  end
 end
