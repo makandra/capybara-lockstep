@@ -487,10 +487,12 @@ describe 'synchronization' do
 
   describe 'settimeout' do
     it 'waits for the timeout to complete' do
+      Capybara::Lockstep.wait_timeout_max_delay = 1000
+
       App.start_script = <<~JS
         setTimeout(() => {
           document.querySelector('body').textContent = 'adjusted page'
-        }, 5)
+        }, 999)
       JS
 
       visit '/start'
@@ -510,11 +512,13 @@ describe 'synchronization' do
       expect(page).to have_content('adjusted page')
     end
 
-    it 'does not wait for the timeout to complete if it takes > 5 sec' do
+    it 'does not wait for the timeout to complete if it takes > configured wait timeout' do
+      Capybara::Lockstep.wait_timeout_max_delay = 1000
+
       App.start_script = <<~JS
         setTimeout(() => {
           document.querySelector('body').textContent = 'adjusted page'
-        }, 6000)
+        }, 1001)
       JS
 
       visit '/start'
@@ -523,6 +527,8 @@ describe 'synchronization' do
     end
 
     it 'does not wait for the timeout to complete if the callback is an async function' do
+      Capybara::Lockstep.wait_timeout_max_delay = 1000
+
       App.start_script = <<~JS
         setTimeout(async () => {
           document.querySelector('body').textContent = 'adjusted page'
@@ -534,6 +540,8 @@ describe 'synchronization' do
     end
 
     it 'stops waiting if clearTimeout is called' do
+      Capybara::Lockstep.wait_timeout_max_delay = 1000
+
       App.start_script = <<~JS
         let timeoutId = setTimeout(() => {
           document.querySelector('body').textContent = 'adjusted page'
@@ -560,7 +568,7 @@ describe 'synchronization' do
       expect(page).to have_content('adjusted page')
     end
 
-    it "does not wait it the timeout is negative" do
+    it 'does not wait it the timeout is negative' do
       App.start_script = <<~JS
         setTimeout(() => {}, -1751537429808)
       JS
@@ -574,5 +582,20 @@ describe 'synchronization' do
       expect(busy).to be(false)
     end
 
+    it 'calls stop work only once' do
+      App.start_script = <<~JS
+        let timeoutId = setTimeout(() => {
+          clearTimeout(timeoutId);
+        })
+      JS
+
+      visit '/start'
+
+      busy = page.evaluate_script(<<~JS)
+        CapybaraLockstep.isBusy()
+      JS
+
+      expect(busy).to be(false)
+    end
   end
 end
