@@ -560,5 +560,19 @@ describe 'synchronization' do
       expect(page).to have_content('adjusted page')
     end
 
+    it "does not wait it the timeout is negative" do
+      App.start_script = <<~JS
+        setTimeout(() => {}, -1751537429808)
+      JS
+
+      visit '/start'
+
+      busy = page.evaluate_script(<<~JS)
+        CapybaraLockstep.isBusy()
+      JS
+
+      expect(busy).to be(false)
+    end
+
   end
 end
