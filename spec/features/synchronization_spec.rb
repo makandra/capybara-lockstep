@@ -490,12 +490,12 @@ describe 'synchronization' do
       App.start_script = <<~JS
         setTimeout(() => {
           document.querySelector('body').textContent = 'adjusted page'
-        }, 500)
+        }, 5)
       JS
 
       visit '/start'
 
-      wait(0.5.seconds).for { page }.to have_content('adjusted page')
+      expect(page).to have_content('adjusted page')
     end
 
     it 'waits is there is no timeout specified' do
@@ -545,5 +545,20 @@ describe 'synchronization' do
 
       expect(page).not_to have_content('adjusted page')
     end
+
+    it 'keeps waiting for the configured wait timeout max delay' do
+      Capybara::Lockstep.wait_timeout_max_delay = 3000
+
+      App.start_script = <<~JS
+        setTimeout(() => {
+          document.querySelector('body').textContent = 'adjusted page'
+        }, 2000)
+      JS
+
+      visit '/start'
+
+      expect(page).to have_content('adjusted page')
+    end
+
   end
 end
