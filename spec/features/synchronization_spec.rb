@@ -522,6 +522,17 @@ describe 'synchronization' do
       expect(page).not_to have_content('adjusted page')
     end
 
+    it 'does not wait for the timeout to complete if the callback is an async function' do
+      App.start_script = <<~JS
+        setTimeout(async () => {
+          document.querySelector('body').textContent = 'adjusted page'
+        }, 1000)
+      JS
+      visit '/start'
+
+      expect(page).not_to have_content('adjusted page')
+    end
+
     it 'stops waiting if clearTimeout is called' do
       App.start_script = <<~JS
         let timeoutId = setTimeout(() => {
