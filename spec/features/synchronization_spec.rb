@@ -498,6 +498,18 @@ describe 'synchronization' do
       wait(0.5.seconds).for { page }.to have_content('adjusted page')
     end
 
+    it 'waits is there is no timeout specified' do
+      App.start_script = <<~JS
+        setTimeout(() => {
+          document.querySelector('body').textContent = 'adjusted page'
+        })
+      JS
+
+      visit '/start'
+
+      expect(page).to have_content('adjusted page')
+    end
+
     it 'does not wait for the timeout to complete if it takes > 5 sec' do
       App.start_script = <<~JS
         setTimeout(() => {
@@ -507,7 +519,7 @@ describe 'synchronization' do
 
       visit '/start'
 
-      wait(0.5.seconds).for { page }.not_to have_content('adjusted page')
+      expect(page).not_to have_content('adjusted page')
     end
 
     it 'stops waiting if clearTimeout is called' do
@@ -520,7 +532,7 @@ describe 'synchronization' do
 
       visit '/start'
 
-      wait(0.5.seconds).for { page }.not_to have_content('adjusted page')
+      expect(page).not_to have_content('adjusted page')
     end
   end
 end
