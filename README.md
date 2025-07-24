@@ -120,9 +120,9 @@ Installation
 Check if your application satisfies all requirements for capybara-lockstep:
 
 - Capybara 2.0 or higher.
-- Your Capybara driver must use [selenium-webdriver](https://rubygems.org/gems/selenium-webdriver/) 3.0 or higher. capybara-lockstep deactivates itself for any other driver.
+- Your Capybara driver must use [selenium-webdriver](https://rubygems.org/gems/selenium-webdriver/) (>3.0) or [cuprite](https://github.com/rubycdp/cuprite). capybara-lockstep deactivates itself for any other driver.
   There is a [fork](https://github.com/Skalar/capybara-lockstep/tree/playwright-driver) with support for [capybara-playwright-driver](https://github.com/YusukeIwaki/capybara-playwright-driver).
-- This gem was only tested with a Selenium-controlled Chrome browser. [Chrome in headless mode](https://makandracards.com/makandra/492109-running-capybara-tests-in-headless-chrome) is recommended, but not required.
+- This gem was only tested with a Chrome browser. [Chrome in headless mode](https://makandracards.com/makandra/492109-running-capybara-tests-in-headless-chrome) is recommended, but not required.
 - This gem was only tested with Rails, but there's no Rails dependency.
 
 
@@ -460,9 +460,19 @@ Pull requests are welcome on GitHub at <https://github.com/makandra/capybara-loc
 
 After checking out the repo, run `bin/setup` to install dependencies.
 
-Then, run `rake spec` to run the tests.
+For running tests see [Running tests locally](#running-tests-locally) below
 
 You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+
+### Running tests locally
+
+capybara-lockstep supports both the `selenium-webdriver` and `cuprite` as drivers for capybara.
+
+To run all the tests for all supported drivers, run `rake spec:all`.
+
+To run all the tests for a specific driver, run `rake spec:selenium` or `rake spec:cuprite`.
+
+The driver can also be specified by setting `CAPYBARA_DRIVER`, so if you want to run a single test for cuprite you can run `CAPYBARA_DRIVER=cuprite bundle exec rspec "spec/features/spec_spec.rb[1]"`.
 
 ### Manually testing a change
 

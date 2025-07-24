@@ -17,6 +17,7 @@ gem 'byebug'
 gem 'gemika', '>= 0.8.1'
 gem 'capybara', '>= 3'
 gem 'selenium-webdriver', '>= 4'
+gem 'cuprite'
 
 # The following gems were previously "default gems" (always available) and are now
 # "bundled gems" (need to be explicitly required). Not all gems in our Gemfile.lock (dev only) do that yet.

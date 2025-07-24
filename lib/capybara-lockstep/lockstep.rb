@@ -9,6 +9,8 @@ module Capybara
       alias synchronizing? synchronizing
 
       def unsynchronize
+        return if mode == :off
+
         client.synchronized = false
       end
 
@@ -28,7 +30,7 @@ module Capybara
 
         # The { lazy } option is a performance optimization that will prevent capybara-lockstep
         # from synchronizing multiple times in expressions like `page.find('.foo').find('.bar')`.
-        # The { lazy } option has nothing todo with :auto mode.
+        # The { lazy } option has nothing to do with :auto mode.
         #
         # With { lazy: true } we only synchronize when the Ruby-side thinks we're out of sync.
         # This saves us an expensive execute_script() roundtrip that goes to the browser and back.
@@ -69,7 +71,24 @@ module Capybara
       end
 
       def client
-        @client ||= Client.new
+        if @client.nil? || !@client.is_a?(client_class)
+          # (Re-)Initialize client if missing or the current driver changes
+          @client = client_class.new
+        end
+
+        @client
+      end
+
+      def client_class
+        if selenium_driver?
+          Client::Selenium
+        elsif cuprite_driver?
+          Client::Cuprite
+        else
+          # This should never raise, as capybara lockstep should disable itself for any unsupported driver.
+          # When it still does, there is probably a bug within capybara lockstep.
+          raise DriverNotSupportedError, "The driver #{driver.class.name} is not supported by capybara-lockstep."
+        end
       end
 
     end
