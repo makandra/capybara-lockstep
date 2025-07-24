@@ -69,7 +69,22 @@ module Capybara
       end
 
       def client
-        @client ||= Client.new
+        if @client.nil? || !@client.is_a?(client_class)
+          # (Re-)Initialize client if missing or the current driver changes
+          @client = client_class.new
+        end
+
+        @client
+      end
+
+      def client_class
+        if selenium_driver?
+          Client::Selenium
+        elsif cuprite_driver?
+          Client::Cuprite
+        else
+          Client
+        end
       end
 
     end

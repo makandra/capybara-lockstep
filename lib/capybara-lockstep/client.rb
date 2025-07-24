@@ -48,7 +48,7 @@ module Capybara
 
         start_time = Util.current_seconds
 
-        begin
+        with_synchronization_error_handling do
           Util.with_max_wait_time(timeout) do
             message_from_js = evaluate_async_script(<<~JS)
               let done = arguments[0]
@@ -84,40 +84,14 @@ module Capybara
               self.synchronized = true
             end
           end
-        rescue ::Selenium::WebDriver::Error::ScriptTimeoutError
-          timeout_message = "Could not synchronize client within #{timeout} seconds"
-          log timeout_message
-          if timeout_with == :error
-            raise Timeout, timeout_message
-          else
-            # Don't raise an error, this may happen if the server is slow to respond.
-            # We will retry on the next Capybara synchronize call.
-          end
-        rescue ::Selenium::WebDriver::Error::UnexpectedAlertOpenError
-          log ERROR_ALERT_OPEN
-          # Don't raise an error, this will happen in an innocent test where a click opens an alert.
-          # We will retry on the next Capybara synchronize call.
-        rescue ::Selenium::WebDriver::Error::NoSuchWindowError
-          log ERROR_WINDOW_CLOSED
-          # Don't raise an error, this will happen in an innocent test where a click closes a window.
-          # We will retry on the next Capybara synchronize call.
-        rescue ::Selenium::WebDriver::Error::JavascriptError => e
-          # When the URL changes while a script is running, my current selenium-webdriver
-          # raises a Selenium::WebDriver::Error::JavascriptError with the message:
-          # "javascript error: document unloaded while waiting for result".
-          # We will retry on the next Capybara synchronize call, by then we should see
-          # the new page.
-          if e.message.include?('unload')
-            log ERROR_NAVIGATED_AWAY
-          else
-            unhandled_synchronize_error(e)
-          end
-        rescue StandardError => e
-          unhandled_synchronize_error(e)
         end
       end
 
       private
+
+      def with_synchronization_error_handling
+        raise NoMethodError, "Implement in a driver specific subclass"
+      end
 
       def unhandled_synchronize_error(e)
         Lockstep.log "#{e.class.name} while synchronizing: #{e.message}"
@@ -135,4 +109,3 @@ module Capybara
     end
   end
 end
-
