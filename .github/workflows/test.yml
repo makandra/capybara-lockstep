@@ -24,8 +24,12 @@ jobs:
           gemfile: Gemfile
         - ruby: 3.4.1
           gemfile: Gemfile
+        - ruby: 3.4.1
+          gemfile: Gemfile
+          capybara_driver: cuprite
     env:
       BUNDLE_GEMFILE: "${{ matrix.gemfile }}"
+      CAPYBARA_DRIVER: "${{ matrix.capybara_driver || 'selenium' }}"
     steps:
     - uses: actions/checkout@v3
     - name: Install Chrome
