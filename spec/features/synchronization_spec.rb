@@ -187,7 +187,7 @@ describe 'synchronization' do
       end
 
       unless Capybara.current_driver == :chrome_cuprite
-        # There seems to be a bug in cuprite/ferrum which does not allow us to insert a lazy iframe  out of view.
+        # There seems to be a bug in cuprite/ferrum which does not allow us to insert a lazy iframe out of view.
         # https://github.com/rubycdp/cuprite/issues/303
 
         it 'does not wait for an iframe with [loading=lazy]' do

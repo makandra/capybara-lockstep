@@ -21,6 +21,9 @@ jobs:
         - ruby: 2.7.2
           gemfile: Gemfile
           capybara_driver: selenium
+        - ruby: 2.7.2
+          gemfile: Gemfile
+          capybara_driver: cuprite
         - ruby: 3.2.0
           gemfile: Gemfile
           capybara_driver: selenium
@@ -33,7 +36,6 @@ jobs:
     env:
       BUNDLE_GEMFILE: "${{ matrix.gemfile }}"
       CAPYBARA_DRIVER: "${{ matrix.capybara_driver }}"
-      CI: true
     steps:
     - uses: actions/checkout@v3
     - name: Install Chrome
@@ -54,6 +56,6 @@ jobs:
     - name: Run tests
       uses: nick-invision/retry@v2
       with:
-        timeout_seconds: 60
+        timeout_seconds: 30
         max_attempts: 3
         command: bundle exec rake spec

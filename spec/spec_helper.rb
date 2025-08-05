@@ -32,15 +32,15 @@ end
 cuprite_options = {
   window_size: [1280, 1024],
   headless: !ENV['NO_HEADLESS'],
-}
-
-cuprite_ci_options = {
-  browser_options: {"no-sandbox" => nil},
   process_timeout: 10,
   timeout: 10
 }
 
-cuprite_options.merge!(cuprite_ci_options) if ENV.key?('CI')
+cuprite_ci_options = {
+  browser_options: {"no-sandbox" => nil},
+}
+
+cuprite_options.merge!(cuprite_ci_options) if ENV.key?('GITHUB_ACTIONS')
 
 Capybara.register_driver :chrome_cuprite do |app|
   Capybara::Cuprite::Driver.new(app, **cuprite_options)
@@ -58,7 +58,7 @@ end
 
 Capybara.configure do |config|
   config.app = App
-  config.server_host = 'localhost'
+  config.server_host = '127.0.0.1'
   config.default_max_wait_time = 1
 end
 

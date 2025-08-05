@@ -16,11 +16,6 @@ module Capybara
         end
 
       rescue ::Ferrum::JavaScriptError => e
-        # When the URL changes while a script is running, my current selenium-webdriver
-        # raises a Selenium::WebDriver::Error::JavascriptError with the message:
-        # "javascript error: document unloaded while waiting for result".
-        # We will retry on the next Capybara synchronize call, by then we should see
-        # the new page.
         if e.message.include?('unload')
           log ERROR_NAVIGATED_AWAY
         else

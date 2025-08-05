@@ -83,7 +83,7 @@ module Capybara
         elsif cuprite_driver?
           Client::Cuprite
         else
-          Client
+          Client # For other drivers the client is still initialized, but synchronization is skipped
         end
       end
 
