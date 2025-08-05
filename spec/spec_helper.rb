@@ -32,8 +32,15 @@ end
 cuprite_options = {
   window_size: [1280, 1024],
   headless: !ENV['NO_HEADLESS'],
-  process_timeout: 30,
 }
+
+cuprite_ci_options = {
+  browser_options: {"no-sandbox" => nil},
+  process_timeout: 10,
+  timeout: 10
+}
+
+cuprite_options.merge!(cuprite_ci_options) if ENV.key?('CI')
 
 Capybara.register_driver :chrome_cuprite do |app|
   Capybara::Cuprite::Driver.new(app, **cuprite_options)

@@ -33,6 +33,7 @@ jobs:
     env:
       BUNDLE_GEMFILE: "${{ matrix.gemfile }}"
       CAPYBARA_DRIVER: "${{ matrix.capybara_driver }}"
+      CI: true
     steps:
     - uses: actions/checkout@v3
     - name: Install Chrome
