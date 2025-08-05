@@ -32,7 +32,7 @@ end
 cuprite_options = {
   window_size: [1280, 1024],
   headless: !ENV['NO_HEADLESS'],
-  timeout: 30,
+  process_timeout: 30,
 }
 
 Capybara.register_driver :chrome_cuprite do |app|
