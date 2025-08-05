@@ -37,7 +37,7 @@ cuprite_options = {
 }
 
 cuprite_ci_options = {
-  browser_options: {"no-sandbox" => nil},
+  browser_options: { 'no-sandbox': nil },
 }
 
 cuprite_options.merge!(cuprite_ci_options) if ENV.key?('GITHUB_ACTIONS')

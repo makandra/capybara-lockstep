@@ -17,7 +17,7 @@ module Capybara
         #
         # Apparently, while an alert/confirm is open, Chrome will block any requests
         # to its `getLog` API. This causes Selenium to time out with a `Net::ReadTimeout` error
-        return unless selenium_driver? # This issue is selenium-specific.
+        return false unless selenium_driver? # This issue is selenium-specific.
 
         page.driver.browser.switch_to.alert
         true
