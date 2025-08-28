@@ -27,6 +27,8 @@ module Capybara
           log ERROR_WINDOW_CLOSED
           # Don't raise an error, this will happen in an innocent test where a click closes a window.
           # We will retry on the next Capybara synchronize call.
+        elsif e.message.include?("Message may have string 'sessionId' property")
+          log ERROR_NAVIGATED_AWAY
         else
           unhandled_synchronize_error(e)
         end
