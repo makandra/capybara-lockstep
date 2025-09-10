@@ -476,9 +476,12 @@ As an alternative you may also install this gem onto your local machine by runni
 
 ### Releasing a new version
 
-- Update the version number in `version.rb`
- - Run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
- - If RubyGems publishing seems to freeze, try entering your OTP code.
+- Update the version number in `version.rb`. Use Semantic Versioning.
+- Run `bundle install` so our `Gemfile.lock` (for development) gets the new version.
+- Update `CHANGELOG.md`.
+- Commit and push your changes.
+- Run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+- If RubyGems publishing seems to freeze, try entering your OTP code.
 
 
 ## License
