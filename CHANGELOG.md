@@ -12,6 +12,9 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 -
 
+# 2.3.0
+
+- Added support for cuprite as the capybara driver
 
 # 2.2.3
 
