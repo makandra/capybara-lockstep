@@ -12,7 +12,7 @@ on:
     - main
 jobs:
   test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 3
     strategy:
       fail-fast: false
@@ -20,12 +20,22 @@ jobs:
         include:
         - ruby: 2.7.2
           gemfile: Gemfile
+          capybara_driver: selenium
+        - ruby: 2.7.2
+          gemfile: Gemfile
+          capybara_driver: cuprite
         - ruby: 3.2.0
           gemfile: Gemfile
+          capybara_driver: selenium
         - ruby: 3.4.1
           gemfile: Gemfile
+          capybara_driver: selenium
+        - ruby: 3.4.1
+          gemfile: Gemfile
+          capybara_driver: cuprite
     env:
       BUNDLE_GEMFILE: "${{ matrix.gemfile }}"
+      CAPYBARA_DRIVER: "${{ matrix.capybara_driver }}"
     steps:
     - uses: actions/checkout@v3
     - name: Install Chrome
@@ -34,6 +44,7 @@ jobs:
       run: chrome --version
     - name: Install ChromeDriver
       uses: nanasess/setup-chromedriver@master
+      if: "${{ matrix.capybara_driver == 'selenium' }}"
     - name: Install ruby
       uses: ruby/setup-ruby@v1
       with:

@@ -42,7 +42,7 @@ module Capybara
       end
 
       def mode
-        if javascript_driver?
+        if supported_driver?
           @mode.nil? ? :auto : @mode
         else
           :off
@@ -120,7 +120,7 @@ module Capybara
       end
 
       def send_config_to_browser(js)
-        return unless javascript_driver?
+        return unless supported_driver?
 
         begin
           Util.with_max_wait_time(2) do

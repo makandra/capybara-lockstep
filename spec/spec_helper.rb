@@ -11,7 +11,6 @@ require 'base64'
 Dir["#{__dir__}/support/**/*.rb"].each { |f| require f }
 
 
-
 RSpec.configure do |config|
   config.include Capybara::DSL
   config.include Capybara::RSpecMatchers
@@ -21,20 +20,45 @@ RSpec.configure do |config|
 end
 
 
-options = Selenium::WebDriver::Chrome::Options.new.tap do |opts|
+selenium_options = Selenium::WebDriver::Chrome::Options.new.tap do |opts|
   opts.add_argument('--headless') unless ENV['NO_HEADLESS']
   opts.add_argument('--window-size=1280,1024')
 end
 
-Capybara.register_driver :chrome do |app|
-  Capybara::Selenium::Driver.new(app, browser: :chrome, capabilities: [options])
+Capybara.register_driver :chrome_selenium do |app|
+  Capybara::Selenium::Driver.new(app, browser: :chrome, capabilities: [selenium_options])
 end
 
-Capybara.default_driver = :chrome
+cuprite_options = {
+  window_size: [1280, 1024],
+  headless: !ENV['NO_HEADLESS'],
+  process_timeout: 10,
+  timeout: 10
+}
+
+cuprite_ci_options = {
+  browser_options: { 'no-sandbox': nil },
+}
+
+cuprite_options.merge!(cuprite_ci_options) if ENV.key?('GITHUB_ACTIONS')
+
+Capybara.register_driver :chrome_cuprite do |app|
+  Capybara::Cuprite::Driver.new(app, **cuprite_options)
+end
+
+driver = ENV.fetch("CAPYBARA_DRIVER", "selenium")
+case driver
+when "selenium"
+  Capybara.default_driver = :chrome_selenium
+when "cuprite"
+  Capybara.default_driver = :chrome_cuprite
+else
+  raise ArgumentError, "Unknown driver: #{driver}"
+end
 
 Capybara.configure do |config|
   config.app = App
-  config.server_host = 'localhost'
+  config.server_host = '127.0.0.1'
   config.default_max_wait_time = 1
 end
 

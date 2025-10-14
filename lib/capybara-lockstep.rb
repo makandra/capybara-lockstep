@@ -1,5 +1,21 @@
 require 'capybara'
-require 'selenium-webdriver'
+
+selenium_loaded = begin
+  require 'selenium-webdriver'
+  true
+rescue LoadError
+  false
+end
+
+cuprite_loaded = begin
+  require 'capybara/cuprite'
+  true
+rescue LoadError
+  false
+end
+
+raise LoadError, "capybara-lockstep requires either selenium-webdriver or cuprite" unless selenium_loaded || cuprite_loaded
+
 require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/module/delegation'
 require 'active_support/lazy_load_hooks'
@@ -20,4 +36,6 @@ require_relative 'capybara-lockstep/capybara_ext'
 require_relative 'capybara-lockstep/helper'
 require_relative 'capybara-lockstep/server'
 require_relative 'capybara-lockstep/client'
+require_relative 'capybara-lockstep/client/selenium'
+require_relative 'capybara-lockstep/client/cuprite'
 require_relative 'capybara-lockstep/middleware'
