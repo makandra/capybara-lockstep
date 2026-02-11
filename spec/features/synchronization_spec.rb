@@ -1,7 +1,5 @@
 describe 'synchronization' do
-
   describe 'on click' do
-
     it 'waits until an AJAX request has finished' do
       App.start_html = <<~HTML
         <a href="#" onclick="fetch('/next')">label</a>
@@ -11,7 +9,7 @@ describe 'synchronization' do
       App.next_action = -> { wall.block }
 
       visit '/start'
-      command = ObservableCommand.new { page.find('a').click  }
+      command = ObservableCommand.new { page.find('a').click }
       expect(command).to run_into_wall(wall)
 
       wall.release
@@ -20,7 +18,6 @@ describe 'synchronization' do
     end
 
     describe 'dynamically inserted images' do
-
       it 'waits until the has loaded' do
         App.start_html = <<~HTML
           <a href="#" onclick="
@@ -31,13 +28,13 @@ describe 'synchronization' do
         HTML
 
         wall = Wall.new
-        App.next_action = -> do
+        App.next_action = lambda {
           wall.block
           send_file_sync('spec/fixtures/image.png', 'image/png')
-        end
+        }
 
         visit '/start'
-        command = ObservableCommand.new { page.find('a').click  }
+        command = ObservableCommand.new { page.find('a').click }
         expect(command).to run_into_wall(wall)
 
         wall.release
@@ -57,13 +54,13 @@ describe 'synchronization' do
         HTML
 
         wall = Wall.new
-        App.next_action = -> do
+        App.next_action = lambda {
           wall.block
           halt 404
-        end
+        }
 
         visit '/start'
-        command = ObservableCommand.new { page.find('a').click  }
+        command = ObservableCommand.new { page.find('a').click }
         expect(command).to run_into_wall(wall)
 
         wall.release
@@ -77,13 +74,13 @@ describe 'synchronization' do
         App.start_html = <<~HTML
           <a href="#" onclick="
             let img = document.createElement('img');
-            img.src = `data:image/png;base64,#{Base64.encode64(File.read('spec/fixtures/image.png')).gsub("\n", '')}`;
+            img.src = `data:image/png;base64,#{Base64.encode64(File.read('spec/fixtures/image.png')).delete("\n")}`;
             document.body.append(img);
           ">label</a>
         HTML
 
         visit '/start'
-        command = ObservableCommand.new { page.find('a').click  }
+        command = ObservableCommand.new { page.find('a').click }
         command.execute
 
         wait(0.2.seconds).for { command }.to be_finished
@@ -105,23 +102,21 @@ describe 'synchronization' do
 
         server_spy = double('server action', reached: nil)
 
-        App.next_action = -> do
+        App.next_action = lambda {
           server_spy.reached
-        end
+        }
 
         visit '/start'
-        command = ObservableCommand.new { page.find('a').click  }
+        command = ObservableCommand.new { page.find('a').click }
         command.execute
 
         wait(0.2.seconds).for { command }.to be_finished
 
-        expect(server_spy).to_not have_received(:reached)
+        expect(server_spy).not_to have_received(:reached)
       end
-
     end
 
     describe 'dynamically inserted iframes' do
-
       it 'waits until the iframe has loaded' do
         App.start_html = <<~HTML
           <a href="#" onclick="
@@ -132,13 +127,13 @@ describe 'synchronization' do
         HTML
 
         wall = Wall.new
-        App.next_action = -> do
+        App.next_action = lambda {
           wall.block
           render_body('hello from iframe')
-        end
+        }
 
         visit '/start'
-        command = ObservableCommand.new { page.find('a').click  }
+        command = ObservableCommand.new { page.find('a').click }
         expect(command).to run_into_wall(wall)
 
         wall.release
@@ -156,13 +151,13 @@ describe 'synchronization' do
         HTML
 
         wall = Wall.new
-        App.next_action = -> do
+        App.next_action = lambda {
           wall.block
           halt 500
-        end
+        }
 
         visit '/start'
-        command = ObservableCommand.new { page.find('a').click  }
+        command = ObservableCommand.new { page.find('a').click }
         expect(command).to run_into_wall(wall)
 
         wall.release
@@ -174,13 +169,13 @@ describe 'synchronization' do
         App.start_html = <<~HTML
           <a href="#" onclick="
             let iframe = document.createElement('iframe');
-            iframe.src = `data:text/html;base64,#{Base64.encode64('hello from iframe').gsub("\n", '')}`;
+            iframe.src = `data:text/html;base64,#{Base64.encode64('hello from iframe').delete("\n")}`;
             document.body.append(iframe);
           ">label</a>
         HTML
 
         visit '/start'
-        command = ObservableCommand.new { page.find('a').click  }
+        command = ObservableCommand.new { page.find('a').click }
         command.execute
 
         wait(0.2.seconds).for { command }.to be_finished
@@ -192,36 +187,34 @@ describe 'synchronization' do
 
         it 'does not wait for an iframe with [loading=lazy]' do
           App.start_html = <<~HTML
-          <a href="#" onclick="
-            let iframe = document.createElement('iframe');
-            iframe.setAttribute('loading', 'lazy');
-            iframe.src = '/next';
-            document.body.append(iframe);
-          ">label</a>
+            <a href="#" onclick="
+              let iframe = document.createElement('iframe');
+              iframe.setAttribute('loading', 'lazy');
+              iframe.src = '/next';
+              document.body.append(iframe);
+            ">label</a>
 
-          #{(1...500).map { |i| "<p>#{i}</p>" }.join}
-        HTML
+            #{(1...500).map { |i| "<p>#{i}</p>" }.join}
+          HTML
 
           server_spy = double('server action', reached: nil)
 
-          App.next_action = -> do
+          App.next_action = lambda {
             server_spy.reached
-          end
+          }
 
           visit '/start'
-          command = ObservableCommand.new { page.find('a').click  }
+          command = ObservableCommand.new { page.find('a').click }
           command.execute
 
           wait(0.2.seconds).for { command }.to be_finished
 
-          expect(server_spy).to_not have_received(:reached)
+          expect(server_spy).not_to have_received(:reached)
         end
       end
-
     end
 
     describe 'dynamically loaded scripts' do
-
       it 'waits until a <script> has loaded' do
         App.start_html = <<~HTML
           <a href="#" onclick="
@@ -232,15 +225,15 @@ describe 'synchronization' do
         HTML
 
         wall = Wall.new
-        App.next_action = -> do
+        App.next_action = lambda {
           wall.block
           content_type 'text/javascript'
           'document.body.style.backgroundColor = "blue"'
-        end
+        }
 
         visit '/start'
 
-        command = ObservableCommand.new { page.find('a').click  }
+        command = ObservableCommand.new { page.find('a').click }
         expect(command).to run_into_wall(wall)
 
         wall.release
@@ -259,15 +252,15 @@ describe 'synchronization' do
         HTML
 
         wall = Wall.new
-        App.next_action = -> do
+        App.next_action = lambda {
           wall.block
           content_type 'text/javascript'
           'document.body.style.backgroundColor = "blue"'
-        end
+        }
 
         visit '/start'
 
-        command = ObservableCommand.new { page.find('a').click  }
+        command = ObservableCommand.new { page.find('a').click }
         expect(command).to run_into_wall(wall)
 
         wall.release
@@ -286,15 +279,15 @@ describe 'synchronization' do
         HTML
 
         wall = Wall.new
-        App.next_action = -> do
+        App.next_action = lambda {
           wall.block
           content_type 'text/dreamberd'
           'const const scores = [3, 2, 5]'
-        end
+        }
 
         visit '/start'
 
-        command = ObservableCommand.new { page.find('a').click  }
+        command = ObservableCommand.new { page.find('a').click }
         command.execute
         wait(0.5.seconds).for { command }.to be_finished
       end
@@ -309,21 +302,20 @@ describe 'synchronization' do
         HTML
 
         wall = Wall.new
-        App.next_action = -> do
+        App.next_action = lambda {
           wall.block
           content_type 'text/javascript'
           'document.body.style.backgroundColor = "blue"'
-        end
+        }
 
         visit '/start'
 
-        command = ObservableCommand.new { page.find('a').click  }
+        command = ObservableCommand.new { page.find('a').click }
         command.execute
         wait(0.2.seconds).for { command }.to be_finished
 
         expect(evaluate_script('EFFECT')).to eq(123)
       end
-
     end
 
     if Capybara.current_driver != :chrome_cuprite
@@ -368,8 +360,7 @@ describe 'synchronization' do
         within_window(window) do
           find('a', text: 'close window').click
         end
-      end.to_not raise_error
-
+      end.not_to raise_error
     end
 
     it 'stays busy for the configured number of tasks' do
@@ -385,15 +376,40 @@ describe 'synchronization' do
 
       expect(page.evaluate_script('CapybaraLockstep.isBusy()')).to eq(true)
 
-      sleep (0.004 * 10)
+      sleep(0.020 * 10) # rAF (~16ms) + setTimeout per task
 
       expect(page.evaluate_script('CapybaraLockstep.isBusy()')).to eq(false)
     end
 
+    it 'waits for a fetch triggered by IntersectionObserver after click makes element visible' do
+      App.start_html = <<~HTML
+        <div id="container" style="display: none;">
+          <div id="target"></div>
+        </div>
+        <a href="#" onclick="document.getElementById('container').style.display = 'block'">show</a>
+        <script>
+          let observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+              fetch('/next');
+            }
+          });
+          observer.observe(document.getElementById('target'));
+        </script>
+      HTML
+
+      wall = Wall.new
+      App.next_action = -> { wall.block }
+
+      visit '/start'
+      command = ObservableCommand.new { page.find('a', text: 'show').click }
+      expect(command).to run_into_wall(wall)
+
+      wall.release
+      wait(0.5.seconds).for { command }.to be_finished
+    end
   end
 
   describe 'when reading elements' do
-
     it "synchronizes before accessing an element, without relying on Capybara's reload mechanic" do
       App.start_html = <<~HTML
         <div id="content">old content</div>
@@ -413,11 +429,9 @@ describe 'synchronization' do
         expect(page).to have_css('#content', text: 'new content')
       end
     end
-
   end
 
   describe 'script execution' do
-
     it 'synchronizes before evaluate_script' do
       App.start_html = <<~HTML
         <div id="content">old content</div>
@@ -439,11 +453,9 @@ describe 'synchronization' do
         expect(page.evaluate_script('myProp')).to eq('value after work')
       end
     end
-
   end
 
   describe 'history navigation' do
-
     it 'stays busy for a bit after history.pushState()' do
       visit '/start'
 
@@ -493,17 +505,14 @@ describe 'synchronization' do
 
       expect(busy).to be(false)
     end
-
   end
 
   describe 'navigating with #visit' do
-
     it 'does not crash and visits the root route when called with nil' do
       visit(nil)
 
       expect(page).to have_content('Root page')
     end
-
   end
 
   describe 'settimeout' do
