@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.summary       = "Synchronize Capybara commands with client-side JavaScript and AJAX requests"
   spec.homepage      = "https://github.com/makandra/capybara-lockstep"
   spec.license       = "MIT"
-  spec.required_ruby_version = Gem::Requirement.new(">= 2.4.0")
+  spec.required_ruby_version = Gem::Requirement.new(">= 3.0.0")
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = spec.homepage
@@ -29,7 +29,7 @@ Gem::Specification.new do |spec|
 
   # Uncomment to register a new dependency of your gem
   spec.add_dependency "capybara", ">= 3.0"
-  spec.add_dependency "activesupport", ">= 4.2"
+  spec.add_dependency "activesupport", ">= 7.0"
   spec.add_dependency "ruby2_keywords"
 
   # For more information and examples about making a new gem, checkout our
