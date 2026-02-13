@@ -18,19 +18,22 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - ruby: 2.7.2
-          gemfile: Gemfile
-          capybara_driver: selenium
-        - ruby: 2.7.2
-          gemfile: Gemfile
-          capybara_driver: cuprite
         - ruby: 3.2.0
           gemfile: Gemfile
           capybara_driver: selenium
+        - ruby: 3.2.0
+          gemfile: Gemfile
+          capybara_driver: cuprite
         - ruby: 3.4.1
           gemfile: Gemfile
           capybara_driver: selenium
         - ruby: 3.4.1
+          gemfile: Gemfile
+          capybara_driver: cuprite
+        - ruby: 4.0.1
+          gemfile: Gemfile
+          capybara_driver: selenium
+        - ruby: 4.0.1
           gemfile: Gemfile
           capybara_driver: cuprite
     env:

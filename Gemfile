@@ -25,3 +25,6 @@ gem 'cuprite'
 # indirect dependencies ourselves.
 gem 'base64' # needed by selenium-webdriver (and potentially others)
 gem 'bigdecimal' # needed by activesupport (and potentially others)
+gem 'ostruct'
+gem 'logger'
+gem 'cgi'
