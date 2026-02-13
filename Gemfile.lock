@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    capybara-lockstep (2.3.0)
+    capybara-lockstep (2.3.1)
       activesupport (>= 7.0)
       capybara (>= 3.0)
 

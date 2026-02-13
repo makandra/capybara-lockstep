@@ -12,6 +12,17 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 -
 
+
+## 2.3.1 - 2026-02-17
+
+### Compatible changes
+
+- Add tests for Ruby 4.0
+- Increase `required_ruby_version` and `activesupport` minimum version in gemspec so people
+  on legacy Ruby and Rails versions don't receive future upgrades
+- Drop tests and support for Ruby < 3 and Rails < 7
+- Drop dependency on `ruby2_keywords`
+
 # 2.3.0
 
 - Added support for cuprite as the capybara driver
