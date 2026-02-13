@@ -1,5 +1,3 @@
-require 'ruby2_keywords'
-
 module Capybara
   module Lockstep
     module SynchronizeMacros
@@ -13,43 +11,37 @@ module Capybara
 
       def synchronize_before(meth, lazy:)
         @synchronize_before_module.module_eval do
-          define_method meth do |*args, &block|
+          define_method meth do |*args, **kwargs, &block|
             @synchronize_before_count ||= 0
             @synchronize_before_count += 1
             Lockstep.auto_synchronize(lazy: lazy, log: "Synchronizing before ##{meth}") if @synchronize_before_count == 1
-            super(*args, &block)
+            super(*args, **kwargs, &block)
           ensure
             @synchronize_before_count -= 1
           end
-
-          ruby2_keywords meth
         end
       end
 
       def synchronize_after(meth)
         @synchronize_after_module.module_eval do
-          define_method meth do |*args, &block|
+          define_method meth do |*args, **kwargs, &block|
             @synchronize_after_count ||= 0
             @synchronize_after_count += 1
-            super(*args, &block)
+            super(*args, **kwargs, &block)
           ensure
             Lockstep.auto_synchronize(log: "Synchronizing after ##{meth}") if @synchronize_after_count == 1
             @synchronize_after_count -= 1
           end
-
-          ruby2_keywords meth
         end
       end
 
       def unsynchronize_after(meth)
         @unsynchronize_after_module.module_eval do
-          define_method meth do |*args, &block|
-            super(*args, &block)
+          define_method meth do |*args, **kwargs, &block|
+            super(*args, **kwargs, &block)
           ensure
             Lockstep.unsynchronize
           end
-
-          ruby2_keywords meth
         end
       end
     end
@@ -82,7 +74,7 @@ end
 module Capybara
   module Lockstep
     module VisitWithWaiting
-      def visit(*args, &block)
+      def visit(*args, **kwargs, &block)
         # For some reason, in Capybara proper, visit(nil) navigates to the root route.
         # We mimic this behavior for (1) parity and (2) to not crash when we inspect the URL below.
         url = args[0].presence || '/'
@@ -104,15 +96,13 @@ module Capybara
           Lockstep.auto_synchronize(lazy: false, log: "Synchronizing before visiting #{url}")
         end
 
-        super(*args, &block).tap do
+        super(*args, **kwargs, &block).tap do
           if visiting_real_url
             # We haven't yet synchronized the new screen.
             Lockstep.unsynchronize
           end
         end
       end
-
-      ruby2_keywords :visit
     end
   end
 end
@@ -127,7 +117,7 @@ module Capybara
 
       def synchronize_around_script_method(meth)
         mod = Module.new do
-          define_method meth do |script, *args, &block|
+          define_method meth do |script, *args, **kwargs, &block|
             # Synchronization uses execute_script itself, so don't synchronize when
             # we're already synchronizing.
             if !Lockstep.synchronizing?
@@ -142,7 +132,7 @@ module Capybara
               Lockstep.auto_synchronize(lazy: !script_may_navigate_away, log: "Synchronizing before script: #{script}")
             end
 
-            super(script, *args, &block)
+            super(script, *args, **kwargs, &block)
           ensure
             if !Lockstep.synchronizing?
               # We haven't yet synchronized with whatever changes the JavaScript
@@ -150,8 +140,6 @@ module Capybara
               Lockstep.unsynchronize
             end
           end
-
-          ruby2_keywords meth
         end
         prepend(mod)
       end
@@ -246,16 +234,14 @@ end
 module Capybara
   module Lockstep
     module SynchronizeWithCatchUp
-      def synchronize(*args, &block)
+      def synchronize(*args, **kwargs, &block)
         # This method is called by Capybara before most interactions with
         # the browser. It is a different method than Capybara::Lockstep.synchronize!
         # We use the { lazy } option to only synchronize when we're out of sync.
         Lockstep.auto_synchronize(lazy: true, log: 'Synchronizing before node access')
 
-        super(*args, &block)
+        super(*args, **kwargs, &block)
       end
-
-      ruby2_keywords :synchronize
     end
   end
 end
