@@ -4,7 +4,6 @@ PATH
     capybara-lockstep (2.3.0)
       activesupport (>= 7.0)
       capybara (>= 3.0)
-      ruby2_keywords
 
 GEM
   remote: https://rubygems.org/
