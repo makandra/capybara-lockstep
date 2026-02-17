@@ -33,6 +33,10 @@ module Capybara
           js += "\nCapybaraLockstep.waitTasks = #{wait_tasks.to_json}"
         end
 
+        if (wait_timeout_max_delay = options.fetch(:wait_timeout_max_delay, Lockstep.wait_timeout_max_delay))
+          js += "\nCapybaraLockstep.waitTimeoutMaxDelay = #{wait_timeout_max_delay.to_json}"
+        end
+
         js
       end
 
