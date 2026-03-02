@@ -1,4 +1,10 @@
 require 'byebug'
+
+# Require all drivers manually before they get required
+# by capybara-lockstep to show better error feedback.
+require 'selenium-webdriver'
+require 'capybara/cuprite'
+
 require "capybara-lockstep"
 require 'capybara'
 require 'capybara/rspec'

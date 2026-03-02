@@ -5,7 +5,7 @@ source "https://rubygems.org"
 # Specify your gem's dependencies in capybara-lockstep.gemspec
 gemspec
 
-gem 'activesupport', '~> 6.0'
+gem 'activesupport', '~> 8.0'
 gem "rake", "~> 13.0"
 
 gem "rspec", "~> 3.0"
@@ -14,7 +14,7 @@ gem 'sinatra'
 gem 'thin' # ruby 3 does not include a webserver
 gem 'puma'
 gem 'byebug'
-gem 'gemika', '>= 0.8.1'
+gem 'gemika'
 gem 'capybara', '>= 3'
 gem 'selenium-webdriver', '>= 4'
 gem 'cuprite'
@@ -25,3 +25,6 @@ gem 'cuprite'
 # indirect dependencies ourselves.
 gem 'base64' # needed by selenium-webdriver (and potentially others)
 gem 'bigdecimal' # needed by activesupport (and potentially others)
+gem 'ostruct'
+gem 'logger'
+gem 'cgi'

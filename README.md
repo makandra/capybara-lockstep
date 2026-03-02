@@ -468,6 +468,8 @@ You can also run `bin/console` for an interactive prompt that will allow you to 
 
 capybara-lockstep supports both the `selenium-webdriver` and `cuprite` as drivers for capybara.
 
+Make sure, your chromedriver version is up to date.
+
 To run all the tests for all supported drivers, run `rake spec:all`.
 
 To run all the tests for a specific driver, run `rake spec:selenium` or `rake spec:cuprite`.
