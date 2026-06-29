@@ -10,7 +10,7 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Compatible changes
 
--
+- Treat a Selenium `UnknownError` carrying the CDP message `Promise was collected` as a benign "navigated away" event, like the existing `document unloaded` `JavascriptError`. Newer Chrome (141+) with selenium-webdriver 4.41 reports a destroyed JS execution context (e.g. Turbo frame swaps, SPA navigations) this way, which previously surfaced as a flaky, hard-to-diagnose test failure.
 
 
 ## 2.3.1 - 2026-02-17
