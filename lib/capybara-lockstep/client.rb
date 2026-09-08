@@ -37,6 +37,18 @@ module Capybara
         # If synchronization fails below we consider us unsynchronized after.
         self.synchronized = false
 
+        # Capybara evaluates filter blocks with `using_wait_time(0)`. Our default timeout is
+        # Capybara.default_max_wait_time, so a nested lookup inside such a block would try
+        # to synchronize with a timeout of 0. An async script can never finish within 0 seconds,
+        # and Capybara's Selenium driver would persist that 0 as the WebDriver script timeout,
+        # breaking every later script-based command with a ScriptTimeoutError.
+        if timeout <= 0
+          log "Cannot synchronize client with a timeout of #{timeout} seconds"
+          # Don't raise an error, this will happen in an innocent test.
+          # We will retry on the next Capybara synchronize call with a real timeout.
+          return
+        end
+
         # Running the synchronization script while an alert is open would close the alert,
         # most likely causing subsequent expectations to fail.
         if alert_present?

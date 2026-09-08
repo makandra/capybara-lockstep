@@ -24,6 +24,19 @@ class App < Sinatra::Base
     instance_exec(&next_action)
   end
 
+  # A page that does not include the capybara-lockstep snippet,
+  # e.g. a page rendered by a layout we don't control.
+  get '/without_snippet' do
+    <<~HTML
+      <html>
+        <head></head>
+        <body>
+          <div id="content">Page without snippet</div>
+        </body>
+      </html>
+    HTML
+  end
+
   def self.reset
     self.start_html = 'hi world'
     self.start_script = 'console.log("loaded")'
