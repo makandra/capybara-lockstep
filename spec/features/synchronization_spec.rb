@@ -434,8 +434,16 @@ describe 'synchronization' do
       # Capybara's visibility check runs a script in the browser.
       expect(page).to have_css('body')
 
-      if Capybara.current_driver == :chrome_selenium
+      if Capybara::Lockstep.selenium_driver?
+        # Capybara's Selenium driver stores the wait time as the WebDriver script timeout,
+        # which outlives the call that set it. Make sure it was not left at 0.
         expect(page.driver.browser.manage.timeouts.script_timeout).to be > 0
+      elsif Capybara::Lockstep.cuprite_driver?
+        # Cuprite passes the wait time to each evaluate_async call as a setTimeout inside
+        # the script. A timeout of 0 only fails that one call and leaves no state behind,
+        # so there is nothing to check.
+      else
+        raise Capybara::Lockstep::DriverNotSupportedError, "The driver #{page.driver.class.name} is not supported by capybara-lockstep."
       end
     end
 

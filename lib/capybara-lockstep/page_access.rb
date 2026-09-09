@@ -25,8 +25,6 @@ module Capybara
         false
       end
 
-      private
-
       def selenium_driver?
         defined?(Capybara::Selenium::Driver) && driver.is_a?(Capybara::Selenium::Driver)
       end
@@ -34,7 +32,6 @@ module Capybara
       def cuprite_driver?
         defined?(Capybara::Cuprite::Driver) && driver.is_a?(Capybara::Cuprite::Driver)
       end
-
 
     end
   end
