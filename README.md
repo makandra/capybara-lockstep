@@ -342,6 +342,8 @@ Capybara::Lockstep.timeout = 5 # seconds
 
 By default Capybara will **not** raise an error after a timeout. You may occasionally get a slow server response, and Capybara will retry synchronization before the next interaction or `visit`. This is often good enough.
 
+When the effective timeout is `0` (e.g. inside a Capybara filter block, which Capybara evaluates with `using_wait_time(0)`), capybara-lockstep skips the synchronization, logs `Cannot synchronize client with a timeout of 0 seconds` and retries on the next interaction.
+
 If you want to be strict you may configure that an `Capybara::Lockstep::Timeout` error is raised after a timeout:
 
 ```ruby

@@ -416,6 +416,59 @@ describe 'synchronization' do
 
   end
 
+  describe 'nested lookups in filter blocks' do
+
+    # Capybara evaluates filter blocks with `using_wait_time(0)`. Our default timeout
+    # is Capybara.default_max_wait_time, so a lazy synchronization triggered by a nested
+    # lookup would run with a timeout of 0. Capybara's Selenium driver persists that 0
+    # as the WebDriver script timeout, which broke every later script-based command
+    # with a Selenium::WebDriver::Error::ScriptTimeoutError.
+    def expect_nested_lookup_to_work
+      # The bug only appears with the default timeout, which falls back to
+      # Capybara.default_max_wait_time and is therefore 0 inside a filter block.
+      Capybara::Lockstep.timeout = nil
+
+      result = page.has_css?('body') { |body| body.has_css?('#content') }
+      expect(result).to eq(true)
+
+      # Capybara's visibility check runs a script in the browser.
+      expect(page).to have_css('body')
+
+      if Capybara::Lockstep.selenium_driver?
+        # Capybara's Selenium driver stores the wait time as the WebDriver script timeout,
+        # which outlives the call that set it. Make sure it was not left at 0.
+        expect(page.driver.browser.manage.timeouts.script_timeout).to be > 0
+      elsif Capybara::Lockstep.cuprite_driver?
+        # Cuprite passes the wait time to each evaluate_async call as a setTimeout inside
+        # the script. A timeout of 0 only fails that one call and leaves no state behind,
+        # so there is nothing to check.
+      else
+        raise Capybara::Lockstep::DriverNotSupportedError, "The driver #{page.driver.class.name} is not supported by capybara-lockstep."
+      end
+    end
+
+    it 'does not break the browser when the client is out of sync because of pending work' do
+      App.start_html = <<~HTML
+        <div id="content">content</div>
+      HTML
+
+      App.start_script = <<~JS
+        CapybaraLockstep.startWork('never finishes')
+      JS
+
+      visit '/start'
+
+      expect_nested_lookup_to_work
+    end
+
+    it 'does not break the browser when the client is out of sync because the snippet is missing' do
+      visit '/without_snippet'
+
+      expect_nested_lookup_to_work
+    end
+
+  end
+
   describe 'script execution' do
 
     it 'synchronizes before evaluate_script' do

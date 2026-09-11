@@ -11,6 +11,7 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 ## Compatible changes
 
 - Treat a Selenium `UnknownError` carrying the CDP message `Promise was collected` as a benign "navigated away" event, like the existing `document unloaded` `JavascriptError`. Newer Chrome (141+) with selenium-webdriver 4.41 reports a destroyed JS execution context (e.g. Turbo frame swaps, SPA navigations) this way, which previously surfaced as a flaky, hard-to-diagnose test failure.
+- Skip client synchronization when the effective timeout is not positive. Capybara evaluates filter blocks (e.g. `has_css?('.foo') { |node| node.has_field?('bar') }`) with `using_wait_time(0)`. A nested lookup inside such a block triggered a synchronization with a timeout of 0 when the client was out of sync (e.g. after a timed-out synchronization or on a page without the capybara-lockstep snippet). Capybara's Selenium driver persisted that 0 as the WebDriver script timeout, so every later script-based command (including Capybara's visibility checks) failed with `Selenium::WebDriver::Error::ScriptTimeoutError`. This only affected the default configuration (`Capybara::Lockstep.timeout = nil`).
 
 
 ## 2.3.1 - 2026-02-17
