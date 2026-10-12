@@ -10,7 +10,7 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Compatible changes
 
--
+- Skip the check for an open alert before synchronizing when the Selenium driver ignores unhandled prompts (`unhandled_prompt_behavior: 'ignore'` or `{ default: 'ignore' }`). Such a driver keeps the alert open while synchronizing, so the check only cost an additional roundtrip to the browser. Configure this with the new option `Capybara::Lockstep.check_alerts` (`true`, `false` or `nil` for auto-detection).
 
 
 # 2.3.2 - 2026-09-11

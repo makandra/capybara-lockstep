@@ -35,6 +35,19 @@ Capybara.register_driver :chrome_selenium do |app|
   Capybara::Selenium::Driver.new(app, browser: :chrome, capabilities: [selenium_options])
 end
 
+# Keeps user prompts (like alerts) open instead of dismissing them, as recommended in the README.
+# We pass the prompt behavior as raw capabilities, as older versions of Selenium::WebDriver::Options convert a map to a string.
+Capybara.register_driver :chrome_selenium_ignoring_prompts do |app|
+  prompt_capabilities = Selenium::WebDriver::Remote::Capabilities.new(unhandled_prompt_behavior: 'ignore')
+  Capybara::Selenium::Driver.new(app, browser: :chrome, capabilities: [selenium_options, prompt_capabilities])
+end
+
+# Same as above, but configured with a map of prompt types.
+Capybara.register_driver :chrome_selenium_ignoring_prompts_by_default do |app|
+  prompt_capabilities = Selenium::WebDriver::Remote::Capabilities.new(unhandled_prompt_behavior: { default: 'ignore' })
+  Capybara::Selenium::Driver.new(app, browser: :chrome, capabilities: [selenium_options, prompt_capabilities])
+end
+
 cuprite_options = {
   window_size: [1280, 1024],
   headless: !ENV['NO_HEADLESS'],
@@ -74,5 +87,6 @@ RSpec.configure do |config|
     Capybara::Lockstep.timeout = 5
     Capybara::Lockstep.debug = false
     Capybara::Lockstep.mode = :auto
+    Capybara::Lockstep.check_alerts = nil
   end
 end
