@@ -338,6 +338,55 @@ describe 'synchronization' do
         page.find('a').click
         page.accept_confirm('OK to proceed?')
       end
+
+      it 'checks for an open alert before synchronizing' do
+        App.start_html = <<~HTML
+          <a href="#" onclick="confirm('OK to proceed?')">label</a>
+        HTML
+
+        visit '/start'
+        expect(Capybara::Lockstep.client).to receive(:alert_present?).at_least(:once).and_call_original
+        page.find('a').click
+        page.accept_confirm('OK to proceed?')
+      end
+
+      [:chrome_selenium_ignoring_prompts, :chrome_selenium_ignoring_prompts_by_default].each do |driver|
+        context "with a driver that ignores unhandled prompts (#{driver})", driver: driver do
+          it 'does not check for an open alert before synchronizing' do
+            App.start_html = <<~HTML
+              <a href="#" onclick="confirm('OK to proceed?')">label</a>
+            HTML
+
+            visit '/start'
+            expect(Capybara::Lockstep.client).to_not receive(:alert_present?)
+            page.find('a').click
+            page.accept_confirm('OK to proceed?')
+          end
+
+          it 'synchronizes again after the alert was closed' do
+            App.start_html = <<~HTML
+              <a href="#" onclick="confirm('OK to proceed?') && fetch('/next')">label</a>
+            HTML
+
+            wall = Wall.new
+            App.next_action = -> { wall.block }
+
+            visit '/start'
+            page.find('a').click
+            page.accept_confirm('OK to proceed?')
+            wait(0.5.seconds).for { wall }.to be_blocking
+
+            command = ObservableCommand.new { page.find('a') }
+            command.execute
+            sleep(0.25.seconds)
+            expect(command).to be_running
+
+            wall.release
+
+            wait(0.5.seconds).for { command }.to be_finished
+          end
+        end
+      end
     end
 
     it 'does handle alerts with accept_confirm using a block to open the alert' do

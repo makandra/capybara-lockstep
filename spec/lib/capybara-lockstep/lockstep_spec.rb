@@ -45,5 +45,64 @@ module Capybara
       end
     end
 
+    describe '.check_alerts?' do
+      it 'returns true when configured to check for alerts' do
+        Capybara::Lockstep.check_alerts = true
+        expect(Capybara::Lockstep.check_alerts?).to eq(true)
+      end
+
+      it 'returns false when configured to not check for alerts' do
+        Capybara::Lockstep.check_alerts = false
+        expect(Capybara::Lockstep.check_alerts?).to eq(false)
+      end
+
+      if Capybara.current_driver != :chrome_cuprite
+        context 'when not configured' do
+          def stub_unhandled_prompt_behavior(behavior)
+            # Like Selenium does with the session's response, we keep the behavior as JSON.
+            capabilities = ::Selenium::WebDriver::Remote::Capabilities.new(unhandled_prompt_behavior: behavior)
+            allow(page.driver.browser).to receive(:capabilities).and_return(capabilities)
+          end
+
+          it 'returns false if the driver ignores prompts' do
+            stub_unhandled_prompt_behavior('ignore')
+            expect(Capybara::Lockstep.check_alerts?).to eq(false)
+          end
+
+          it 'returns true for other prompt behaviors' do
+            stub_unhandled_prompt_behavior('dismiss and notify')
+            expect(Capybara::Lockstep.check_alerts?).to eq(true)
+          end
+
+          it 'returns true when the driver reports no prompt behavior' do
+            stub_unhandled_prompt_behavior(nil)
+            expect(Capybara::Lockstep.check_alerts?).to eq(true)
+          end
+
+          it 'returns false for a map that ignores all prompts by default' do
+            stub_unhandled_prompt_behavior({ 'default' => 'ignore' })
+            expect(Capybara::Lockstep.check_alerts?).to eq(false)
+          end
+
+          it 'returns false for a map that ignores alerts, confirms and prompts' do
+            stub_unhandled_prompt_behavior({ 'alert' => 'ignore', 'confirm' => 'ignore', 'prompt' => 'ignore' })
+            expect(Capybara::Lockstep.check_alerts?).to eq(false)
+          end
+
+          it 'returns true for a map that handles one of alerts, confirms or prompts' do
+            stub_unhandled_prompt_behavior({ 'default' => 'ignore', 'confirm' => 'accept' })
+            expect(Capybara::Lockstep.check_alerts?).to eq(true)
+
+            stub_unhandled_prompt_behavior({ 'alert' => 'ignore', 'confirm' => 'ignore' })
+            expect(Capybara::Lockstep.check_alerts?).to eq(true)
+          end
+        end
+      else
+        it 'returns true when not configured' do
+          expect(Capybara::Lockstep.check_alerts?).to eq(true)
+        end
+      end
+    end
+
   end
 end

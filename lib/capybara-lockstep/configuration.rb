@@ -18,6 +18,16 @@ module Capybara
         @timeout_with = action&.to_sym
       end
 
+      def check_alerts?
+        # A driver that ignores unhandled prompts keeps an alert open while running our synchronization script.
+        # It raises an UnexpectedAlertOpenError instead, which we handle like an open alert.
+        @check_alerts.nil? ? !unhandled_prompts_ignored? : @check_alerts
+      end
+
+      def check_alerts=(value)
+        @check_alerts = value
+      end
+
       def debug
         @debug.nil? ? false : @debug
       end

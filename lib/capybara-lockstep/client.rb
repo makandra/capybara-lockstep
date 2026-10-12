@@ -49,9 +49,9 @@ module Capybara
           return
         end
 
-        # Running the synchronization script while an alert is open would close the alert,
-        # most likely causing subsequent expectations to fail.
-        if alert_present?
+        # Unless the driver ignores unhandled prompts, running the synchronization script while an alert
+        # is open would close the alert, most likely causing subsequent expectations to fail.
+        if check_alerts? && alert_present?
           log ERROR_ALERT_OPEN
           # Don't raise an error, this will happen in an innocent test.
           # We will retry on the next Capybara synchronize call.
@@ -108,6 +108,10 @@ module Capybara
       def unhandled_synchronize_error(e)
         Lockstep.log "#{e.class.name} while synchronizing: #{e.message}"
         raise e
+      end
+
+      def check_alerts?
+        Lockstep.check_alerts?
       end
 
       def timeout

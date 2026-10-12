@@ -184,7 +184,7 @@ use Capybara::Lockstep::Middleware
 ### Configuring Selenium WebDriver (recommended)
 
 By default, webdrivers will automatically dismiss any user prompts (like alerts) when trying to perform an action.
-While capybara-lockstep carefully detects alerts before synchronizing, and will skip interaction with the browser to avoid accidentally dismissing alerts, it can not synchronize around some rare race conditions.
+With this default, capybara-lockstep checks for an open alert before synchronizing, and will skip interaction with the browser to avoid accidentally dismissing alerts. However, it can not synchronize around some rare race conditions, and the check costs an additional roundtrip to the browser.
 
 [We recommend](https://makandracards.com/makandra/617366-how-to-configure-selenium-webdriver-to-not-automatically-close-alerts-or-other-browser-dialogs) you configure your webdriver to not automatically dismiss user prompts by setting the "unhandled prompt behavior" capability to [`ignore`](https://w3c.github.io/webdriver/#dfn-known-prompt-handling-approaches-table). Using "ignore", errors are raised like with the default behavior, but user prompts are kept open.
 
@@ -198,6 +198,18 @@ Capybara.register_driver(:selenium) do |app|
   Capybara::Selenium::Driver.new(app, browser: :chrome, options: options)
 end
 ```
+
+When your driver ignores user prompts, capybara-lockstep no longer checks for an open alert before synchronizing. The driver keeps the alert open and capybara-lockstep retries synchronization on the next Capybara command. This also works when you configure the capability by prompt type, e.g. `unhandled_prompt_behavior: { default: 'ignore' }`, as long as alerts, confirms and prompts are all ignored. Note that selenium-webdriver 4.35 and older convert such a map to a string when passed through `Options`. On these versions, pass it as `Selenium::WebDriver::Remote::Capabilities.new(unhandled_prompt_behavior: { default: 'ignore' })` alongside your options.
+
+You can override this detection:
+
+```ruby
+Capybara::Lockstep.check_alerts = true  # always check for an open alert before synchronizing
+Capybara::Lockstep.check_alerts = false # never check for an open alert before synchronizing
+Capybara::Lockstep.check_alerts = nil   # check unless the driver ignores user prompts (default)
+```
+
+Only disable the check if your driver keeps alerts open, otherwise synchronization will dismiss them.
 
 ### Verify successful integration
 
