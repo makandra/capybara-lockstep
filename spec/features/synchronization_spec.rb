@@ -598,6 +598,24 @@ describe 'synchronization' do
 
   end
 
+  describe 'when the page navigates away while synchronizing' do
+
+    it 'does not raise an error and synchronizes with the new page' do
+      App.start_script = <<~JS
+        fetch('/next')
+        setTimeout(() => location.replace('/'), 500)
+      JS
+
+      wall = Wall.new
+      App.next_action = -> { wall.block }
+
+      visit '/start'
+
+      expect(page).to have_content('Root page')
+    end
+
+  end
+
   describe 'navigating with #visit' do
 
     it 'does not crash and visits the root route when called with nil' do
