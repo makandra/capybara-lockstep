@@ -10,7 +10,7 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Compatible changes
 
--
+- Fix a test failure with Cuprite and Ferrum 0.20+ when the page navigates away while capybara-lockstep synchronizes. `Ferrum::NoExecutionContextError`, and `Ferrum::NodeNotFoundError` with the message `Inspected target navigated or closed`, are now treated as a "navigated away" event.
 
 
 # 2.4.0 - 2026-10-15

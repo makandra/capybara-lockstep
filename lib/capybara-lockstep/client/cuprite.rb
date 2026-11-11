@@ -22,6 +22,16 @@ module Capybara
           unhandled_synchronize_error(e)
         end
 
+      rescue ::Ferrum::NoExecutionContextError
+        log ERROR_NAVIGATED_AWAY
+
+      rescue ::Ferrum::NodeNotFoundError => e
+        if e.message.include?('Inspected target navigated or closed')
+          log ERROR_NAVIGATED_AWAY
+        else
+          unhandled_synchronize_error(e)
+        end
+
       rescue ::Ferrum::BrowserError => e
         if e.message.include?('Session with given id not found.')
           log ERROR_WINDOW_CLOSED
