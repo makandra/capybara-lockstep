@@ -99,6 +99,20 @@ module Capybara
         @wait_tasks
       end
 
+      def wait_timeout_max_delay
+        @wait_timeout_max_delay
+      end
+
+      def wait_timeout_max_delay=(value)
+        @wait_timeout_max_delay = value
+
+        send_config_to_browser(<<~JS)
+          CapybaraLockstep.waitTimeoutMaxDelay = #{value.to_json}
+        JS
+
+        @wait_timeout_max_delay
+      end
+
       def after_synchronize(&callback)
         after_synchronize_callbacks << callback
       end
